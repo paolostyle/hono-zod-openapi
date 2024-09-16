@@ -1,0 +1,58 @@
+{
+  "name": "hono-zod-openapi",
+  "version": "0.1.0",
+  "description": "Alternative Hono middleware for creating OpenAPI documentation from Zod schemas",
+  "author": "Paweł Dąbrowski <dabrowskip9@gmail.com>",
+  "homepage": "https://github.com/paolostyle/hono-zod-openapi#readme",
+  "bugs": {
+    "url": "https://github.com/paolostyle/hono-zod-openapi/issues"
+  },
+  "repository": "github:paolostyle/hono-zod-openapi",
+  "license": "MIT",
+  "keywords": [
+    "hono",
+    "zod",
+    "openapi",
+    "documentation",
+    "middleware",
+    "swagger",
+    "typescript"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "format": "prettier --write .",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.2.2",
+    "zod-openapi": "^2.19.0"
+  },
+  "peerDependencies": {
+    "hono": "^4.5.0",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "prettier-plugin-organize-imports": "^4.0.0",
+    "tsup": "^8.2.4",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.1"
+  },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-organize-imports"
+    ],
+    "singleQuote": true
+  },
+  "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c"
+}

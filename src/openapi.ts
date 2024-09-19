@@ -1,6 +1,7 @@
 import { zValidator } from '@hono/zod-validator';
 import type { Env, Hono, MiddlewareHandler } from 'hono';
 import { every } from 'hono/combine';
+import { createMiddleware } from 'hono/factory';
 import { z } from 'zod';
 import {
   createDocument,
@@ -18,6 +19,7 @@ import type {
   NormalizedResponseSchemas,
   PathSchemas,
   RequestSchemas,
+  ResponseParams,
   ResponseSchemas,
   ValidationTarget,
   Values,
@@ -28,6 +30,7 @@ const OpenApiSymbol = Symbol();
 
 export function createOpenApiMiddleware(
   zodValidator: ZodValidatorFn = zValidator,
+  { validateResponse = true } = {},
 ) {
   return function openApi<
     ReqS extends RequestSchemas,
@@ -39,6 +42,27 @@ export function createOpenApiMiddleware(
     requestSchemas: ReqS = {} as ReqS,
     endpointDetails: EndpointDetails = {},
   ): MiddlewareHandler<E, P, Values<ReqS>> {
+    type GetSchema<T extends ResponseSchemas> =
+      T extends Array<ResponseParams<infer S>>
+        ? S
+        : T extends ResponseParams<infer S>
+          ? S
+          : T;
+
+    const passResponseMiddleware = createMiddleware<{
+      Variables: {
+        responseSchema: GetSchema<ResS>;
+      };
+    }>(async (c, next) => {
+      const schema =
+        responseSchemas instanceof z.Schema
+          ? responseSchemas
+          : Array.isArray(responseSchemas);
+      await next();
+
+      c.res;
+    });
+
     const validators = Object.entries(requestSchemas)
       .map(([target, schemaOrParams]) => {
         const schema =

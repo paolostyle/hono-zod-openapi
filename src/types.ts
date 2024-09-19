@@ -4,6 +4,7 @@ import type {
 } from 'hono';
 import type { StatusCode } from 'hono/utils/http-status';
 import { z } from 'zod';
+import type { ZodOpenApiOperationObject } from 'zod-openapi';
 
 type AnyZ = z.ZodType<any, z.ZodTypeDef, any>;
 
@@ -38,6 +39,7 @@ export type Method = 'get' | 'put' | 'post' | 'delete' | 'options' | 'patch';
 export type PathSchemas = {
   request: RequestSchemas;
   response: ResponseSchemas;
+  endpointDetails: EndpointDetails;
 };
 
 export type NormalizedRequestSchemas = Partial<Record<RequestParam, AnyZ>>;
@@ -105,3 +107,8 @@ export type ZodValidatorFn = <
   target: T,
   schema: S,
 ) => MiddlewareHandler;
+
+export type EndpointDetails = Omit<
+  ZodOpenApiOperationObject,
+  'responses' | 'requestBody' | 'requestParams'
+>;

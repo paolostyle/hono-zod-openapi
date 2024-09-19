@@ -12,6 +12,7 @@ import {
   type ZodOpenApiResponsesObject,
 } from 'zod-openapi';
 import type {
+  EndpointDetails,
   Method,
   NormalizedRequestSchemas,
   NormalizedResponseSchemas,
@@ -36,6 +37,7 @@ export function createOpenApiMiddleware(
   >(
     responseSchemas: ResS,
     requestSchemas: ReqS = {} as ReqS,
+    endpointDetails: EndpointDetails = {},
   ): MiddlewareHandler<E, P, Values<ReqS>> {
     const validators = Object.entries(requestSchemas)
       .map(([target, schemaOrParams]) => {
@@ -58,6 +60,7 @@ export function createOpenApiMiddleware(
       [OpenApiSymbol]: {
         request: requestSchemas,
         response: responseSchemas,
+        endpointDetails,
       },
     });
   };
@@ -65,17 +68,18 @@ export function createOpenApiMiddleware(
 
 export const openApi = createOpenApiMiddleware();
 
-interface Settings {
+type Settings = {
+  routeName?: string;
   addRoute?: boolean;
   overrides?: (
     paths: NonNullable<ZodOpenApiObject['paths']>,
   ) => Partial<ZodOpenApiObject>;
-}
+};
 
 export function createOpenApi(
   router: Hono,
   info: ZodOpenApiObject['info'],
-  { addRoute = true, overrides }: Settings = {},
+  { addRoute = true, routeName = '/doc', overrides }: Settings = {},
   // fixme: return type
 ): Record<string, any> {
   const paths: ZodOpenApiPathsObject = {};
@@ -83,7 +87,7 @@ export function createOpenApi(
   router.routes
     .filter((route) => OpenApiSymbol in route.handler)
     .forEach((route) => {
-      const { request, response } = (route.handler as any)[
+      const { request, response, endpointDetails } = (route.handler as any)[
         OpenApiSymbol
       ] as PathSchemas;
 
@@ -143,6 +147,7 @@ export function createOpenApi(
         },
         requestBody: requestSchemas.json && requestBody,
         responses,
+        ...endpointDetails,
       };
 
       if (!(route.path in paths)) {
@@ -160,7 +165,7 @@ export function createOpenApi(
   });
 
   if (addRoute) {
-    router.get('/doc', (c) => c.json(openApiDoc, 200));
+    router.get(routeName, (c) => c.json(openApiDoc, 200));
   }
 
   return openApiDoc;

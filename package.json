@@ -31,7 +31,8 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts",
     "format": "prettier --write .",
-    "test": "vitest"
+    "test": "vitest",
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.2.2",
@@ -42,9 +43,12 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@hono/node-server": "^1.13.0",
+    "@hono/swagger-ui": "^0.4.1",
     "prettier": "^3.3.3",
     "prettier-plugin-organize-imports": "^4.0.0",
     "tsup": "^8.2.4",
+    "tsx": "^4.19.1",
     "typescript": "^5.6.2",
     "vitest": "^2.1.1"
   },

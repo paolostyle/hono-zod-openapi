@@ -6,7 +6,7 @@ import type { StatusCode } from 'hono/utils/http-status';
 import { z } from 'zod';
 import type { ZodOpenApiOperationObject } from 'zod-openapi';
 
-type AnyZ = z.ZodType<any, z.ZodTypeDef, any>;
+export type AnyZ = z.ZodType<any, z.ZodTypeDef, any>;
 
 export type ValidationTarget = 'json' | 'query' | 'param' | 'cookie' | 'header';
 type RequestParam = ValidationTarget;
@@ -14,16 +14,48 @@ type ValidationSchemas = Partial<Record<ValidationTarget, AnyZ>>;
 type ValidationTargets = Omit<ValidationTargetsWithForm, 'form'>;
 
 export type ValidationTargetParams<T extends AnyZ> = {
+  /**
+   * Zod schema for the target.
+   */
   schema: T;
+  /**
+   * Determines whether the target should be validated or if the schema should only be used for documentation.
+   * @default true
+   */
   validate?: boolean;
 };
 
+export type StatusCodePrefix = '1' | '2' | '3' | '4' | '5';
+export type StatusCodeWildcards = `${StatusCodePrefix}XX`;
+export type StatusCodeWithoutMinus1 = Exclude<StatusCode, -1>;
+export type StatusCodeWithWildcards =
+  | StatusCodeWithoutMinus1
+  | StatusCodeWildcards;
+
 export type ResponseParams<T extends AnyZ> = {
+  status: StatusCodeWithWildcards;
+  /**
+   * Zod schema for the response body. By default, it will only be used for documentation purposes.
+   * If you want to validate the response body, set the `validate` option to `true`, or create a middleware
+   * with the `createOpenApiMiddleware` function
+   */
   schema: T;
-  status: StatusCode;
+  /**
+   * Description of the response. When using the object, it must be manually provided.
+   */
   description: string;
+  /**
+   * Response media type, usually determined by a method on Hono's context object, e.g. c.json(),
+   * or explicitly set with `Content-Type` header. If `validate` is `true`, the `Content-Type`
+   * response header will be validated against this value.
+   * @default `application/json`
+   */
   mediaType?: string;
-  example?: z.input<T>;
+  /**
+   * Determines whether the response body and media type should be validated.
+   * @default false
+   */
+  validate?: boolean;
 };
 
 export type ResponseSchemas =
@@ -36,9 +68,9 @@ export type RequestSchemas = Partial<
 
 export type Method = 'get' | 'put' | 'post' | 'delete' | 'options' | 'patch';
 
-export type PathSchemas = {
+export type PathsSchemas = {
   request: RequestSchemas;
-  response: ResponseSchemas;
+  response: NormalizedResponseSchemas;
   endpointDetails: EndpointDetails;
 };
 

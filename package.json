@@ -32,7 +32,7 @@
     "build": "tsup src/index.ts --format esm --dts",
     "format": "prettier --write .",
     "typecheck": "tsc",
-    "test": "vitest",
+    "test": "vitest --typecheck",
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {

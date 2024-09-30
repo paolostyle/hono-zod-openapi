@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
 import { testClient } from 'hono/testing';
-import { describe, expect, expectTypeOf, it } from 'vitest';
+import { describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { z } from 'zod';
 import { extendZodWithOpenApi } from 'zod-openapi';
-import { createOpenApiDocs, openApi } from './openapi';
+import { createOpenApiDocs, createOpenApiMiddleware, openApi } from './openapi';
 
 extendZodWithOpenApi(z);
 
@@ -202,55 +202,106 @@ describe('paths: createOpenApiDocs', () => {
 });
 
 describe('default openApi middleware', () => {
-  describe('request validation', () => {
-    it('validates request body', async () => {
+  it('validates request body', async () => {
+    const app = new Hono().post(
+      '/user',
+      openApi(z.object({ name: z.string() }), {
+        json: z.object({ name: z.string() }),
+      }),
+      async (c) => {
+        const body = c.req.valid('json');
+
+        expectTypeOf(body).toEqualTypeOf<{ name: string }>();
+
+        // @ts-expect-error c.req.valid() should only accept json
+        const nonExistent = c.req.valid('cookie');
+        // @ts-expect-error c.req.valid() should only accept json
+        const nonExistent2 = c.req.valid('header');
+        // @ts-expect-error c.req.valid() should only accept json
+        const nonExistent3 = c.req.valid('query');
+        // @ts-expect-error c.req.valid() should only accept json
+        const nonExistent4 = c.req.valid('param');
+
+        return c.json(body, 200);
+      },
+    );
+
+    const client = testClient(app);
+    const response = await client.user.$post({ json: { name: 'John' } });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ name: 'John' });
+
+    // @ts-expect-error name should be a string
+    const response2 = await client.user.$post({ json: { name: 123 } });
+    expect(response2.status).toBe(400);
+    expect(await response2.json()).toEqual({
+      error: {
+        issues: [
+          {
+            code: 'invalid_type',
+            expected: 'string',
+            message: 'Expected string, received number',
+            path: ['name'],
+            received: 'number',
+          },
+        ],
+        name: 'ZodError',
+      },
+      success: false,
+    });
+  });
+
+  it.each(['cookie', 'header', 'query', 'param', 'json'] as const)(
+    'passes target %s and schema to validator',
+    async (type) => {
+      const validatorMock = vi.fn();
+      const someSchema = z.object({ name: z.string() }).optional();
+      const middleware = createOpenApiMiddleware(validatorMock);
+
       const app = new Hono().post(
         '/user',
-        openApi(z.object({ name: z.string() }), {
-          json: z.object({ name: z.string() }),
+        middleware(someSchema, {
+          [type]: someSchema,
         }),
         async (c) => {
-          const body = c.req.valid('json');
-
-          expectTypeOf(body).toEqualTypeOf<{ name: string }>();
-
-          // @ts-expect-error c.req.valid() should only accept json
-          const nonExistent = c.req.valid('cookie');
-          // @ts-expect-error c.req.valid() should only accept json
-          const nonExistent2 = c.req.valid('header');
-          // @ts-expect-error c.req.valid() should only accept json
-          const nonExistent3 = c.req.valid('query');
-          // @ts-expect-error c.req.valid() should only accept json
-          const nonExistent4 = c.req.valid('param');
-
-          return c.json(body, 200);
+          return c.json({ name: 'John' }, 200);
         },
       );
 
       const client = testClient(app);
-      const response = await client.user.$post({ json: { name: 'John' } });
+      await client.user.$post({} as any);
 
-      expect(response.status).toBe(200);
-      expect(await response.json()).toEqual({ name: 'John' });
+      expect(validatorMock).toHaveBeenCalledWith(type, someSchema);
+    },
+  );
 
-      // @ts-expect-error name should be a string
-      const response2 = await client.user.$post({ json: { name: 123 } });
-      expect(response2.status).toBe(400);
-      expect(await response2.json()).toEqual({
-        error: {
-          issues: [
-            {
-              code: 'invalid_type',
-              expected: 'string',
-              message: 'Expected string, received number',
-              path: ['name'],
-              received: 'number',
-            },
-          ],
-          name: 'ZodError',
-        },
-        success: false,
-      });
-    });
+  it('passes multiple targets and schemas to validator', async () => {
+    const validatorMock = vi.fn();
+    const someSchema = z.object({ name: z.string() });
+    const middleware = createOpenApiMiddleware(validatorMock);
+
+    const app = new Hono().post(
+      '/user',
+      middleware(z.object({ name: z.string() }), {
+        cookie: someSchema,
+        header: someSchema,
+        query: someSchema,
+        json: someSchema,
+        param: someSchema,
+      }),
+      async (c) => {
+        return c.json({ name: 'John' }, 200);
+      },
+    );
+
+    const client = testClient(app);
+    await client.user.$post({} as any);
+
+    expect(validatorMock).toHaveBeenCalledWith('cookie', someSchema);
+    expect(validatorMock).toHaveBeenCalledWith('header', someSchema);
+    expect(validatorMock).toHaveBeenCalledWith('query', someSchema);
+    expect(validatorMock).toHaveBeenCalledWith('json', someSchema);
+    expect(validatorMock).toHaveBeenCalledWith('param', someSchema);
   });
 });

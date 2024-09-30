@@ -116,7 +116,11 @@ export function createOpenApiMiddleware(
       })
       .filter((v) => !!v);
 
-    const middleware = every(...validators, validateResponseMiddleware);
+    if (validateResponse) {
+      validators.push(validateResponseMiddleware);
+    }
+
+    const middleware = every(...validators);
 
     return Object.assign(middleware, {
       [OpenApiSymbol]: {

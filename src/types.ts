@@ -30,7 +30,8 @@ export type StatusCodeWildcards = `${StatusCodePrefix}XX`;
 export type StatusCodeWithoutMinus1 = Exclude<StatusCode, -1>;
 export type StatusCodeWithWildcards =
   | StatusCodeWithoutMinus1
-  | StatusCodeWildcards;
+  | StatusCodeWildcards
+  | 'default';
 
 export type ResponseParams<T extends AnyZ> = {
   status: StatusCodeWithWildcards;

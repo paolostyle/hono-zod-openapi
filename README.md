@@ -67,7 +67,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { createOpenApi, openApi } from 'hono-zod-openapi';
 
-export const app = new Hono().route('/sub', subRouter).get(
+export const app = new Hono().get(
   '/user',
   openApi(
     // response type

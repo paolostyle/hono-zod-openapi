@@ -1,6 +1,7 @@
 import { zValidator } from '@hono/zod-validator';
 import type { Env, Hono, MiddlewareHandler } from 'hono';
 import { every } from 'hono/combine';
+import { createMiddleware } from 'hono/factory';
 import { z } from 'zod';
 import {
   createDocument,
@@ -12,13 +13,16 @@ import {
   type ZodOpenApiResponsesObject,
 } from 'zod-openapi';
 import type {
+  AnyZ,
   EndpointDetails,
   Method,
   NormalizedRequestSchemas,
-  NormalizedResponseSchemas,
-  PathSchemas,
+  PathsSchemas,
   RequestSchemas,
+  ResponseParams,
   ResponseSchemas,
+  StatusCodePrefix,
+  StatusCodeWithWildcards,
   ValidationTarget,
   Values,
   ZodValidatorFn,
@@ -26,12 +30,33 @@ import type {
 
 const OpenApiSymbol = Symbol();
 
+function normalizeResponseSchemas<T extends AnyZ>(
+  responseSchemas: T | ResponseParams<T> | Array<ResponseParams<T>>,
+): Array<ResponseParams<T>> {
+  if (Array.isArray(responseSchemas)) {
+    return responseSchemas;
+  }
+
+  if ('schema' in responseSchemas) {
+    return [responseSchemas];
+  }
+
+  return [
+    {
+      status: 200,
+      schema: responseSchemas,
+      description: '200 OK',
+    },
+  ];
+}
+
 export function createOpenApiMiddleware(
   zodValidator: ZodValidatorFn = zValidator,
+  { validateResponse = false } = {},
 ) {
   return function openApi<
-    ReqS extends RequestSchemas,
     ResS extends ResponseSchemas,
+    ReqS extends RequestSchemas,
     E extends Env,
     P extends string,
   >(
@@ -39,6 +64,43 @@ export function createOpenApiMiddleware(
     requestSchemas: ReqS = {} as ReqS,
     endpointDetails: EndpointDetails = {},
   ): MiddlewareHandler<E, P, Values<ReqS>> {
+    const normalizedResponseSchemas = normalizeResponseSchemas(responseSchemas);
+
+    const validateResponseMiddleware = createMiddleware(async (c, next) => {
+      await next();
+
+      const response = c.res as Response;
+      const responseParams = normalizedResponseSchemas.find((i) => {
+        if (i.status === response.status) return true;
+        const statusPrefix = `${response.status}`[0] as StatusCodePrefix;
+        return i.status === statusPrefix + 'XX';
+      });
+
+      if (!responseParams) return;
+
+      const { schema, validate, mediaType } = responseParams;
+      const shouldValidate =
+        validate || (validateResponse && validate !== false);
+      const contentType = response.headers.get('content-type');
+
+      if (!shouldValidate) return;
+
+      if (mediaType && contentType !== mediaType) {
+        throw new Error(
+          'Content type does not match the response schema definition',
+        );
+      } else {
+        responseParams.mediaType ??= contentType ?? 'application/json';
+      }
+
+      const copy = response.clone();
+      const body = await response.json();
+
+      schema.parse(body);
+
+      c.res = copy;
+    });
+
     const validators = Object.entries(requestSchemas)
       .map(([target, schemaOrParams]) => {
         const schema =
@@ -54,12 +116,16 @@ export function createOpenApiMiddleware(
       })
       .filter((v) => !!v);
 
+    if (validateResponse) {
+      validators.push(validateResponseMiddleware);
+    }
+
     const middleware = every(...validators);
 
     return Object.assign(middleware, {
       [OpenApiSymbol]: {
         request: requestSchemas,
-        response: responseSchemas,
+        response: normalizedResponseSchemas,
         endpointDetails,
       },
     });
@@ -76,7 +142,7 @@ type Settings = {
   ) => Partial<ZodOpenApiObject>;
 };
 
-export function createOpenApi(
+export function createOpenApiDocs(
   router: Hono,
   info: ZodOpenApiObject['info'],
   { addRoute = true, routeName = '/doc', overrides }: Settings = {},
@@ -89,7 +155,7 @@ export function createOpenApi(
     .forEach((route) => {
       const { request, response, endpointDetails } = (route.handler as any)[
         OpenApiSymbol
-      ] as PathSchemas;
+      ] as PathsSchemas;
 
       const requestSchemas: NormalizedRequestSchemas = Object.fromEntries(
         Object.entries(request).map(
@@ -98,29 +164,16 @@ export function createOpenApi(
         ),
       );
 
-      const responseSchemas: NormalizedResponseSchemas = Array.isArray(response)
-        ? response
-        : response instanceof z.Schema
-          ? [{ status: 200, description: 'Success', schema: response }]
-          : [response];
-
-      const responses = responseSchemas.reduce<ZodOpenApiResponsesObject>(
+      const responses = response.reduce<ZodOpenApiResponsesObject>(
         (
           acc,
-          {
-            schema,
-            status,
-            mediaType = 'application/json',
-            description,
-            example,
-          },
+          { description, schema, mediaType = 'application/json', status },
         ) => {
-          acc[status as any] = {
+          acc[status as `${StatusCodeWithWildcards}`] = {
             description,
             content: {
               [mediaType]: {
                 schema,
-                example,
               },
             },
           } satisfies ZodOpenApiResponseObject;

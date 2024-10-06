@@ -5,17 +5,7 @@ Alternative Hono middleware for creating OpenAPI documentation from Zod schemas
 ## Installation
 
 ```
-# NPM
 npm install hono-zod-openapi hono zod
-
-# Yarn
-yarn add hono-zod-openapi hono zod
-
-# PNPM
-pnpm add hono-zod-openapi hono zod
-
-# Bun
-bun add hono-zod-openapi hono zod
 ```
 
 ## Why?
@@ -24,14 +14,19 @@ Hono provides a 3rd-party middleware in their [middleware](https://github.com/ho
 which probably works alright, however my issue with this package is that it forces you to write your code
 in a different manner than you normally would in Hono. Refactoring the app becomes a significant hassle.
 
-My library takes a different approach and effectively provides the same value as `@hono/zod-validator` with the bonus of generating the
+This library provides an `openApi` middleware instead, which you can easily add to your existing codebase, and a `createOpenApiDocument` function,
+which will generate an OpenAPI-compliant JSON document and serve it under `/doc` route of your app (it's configurable, don't worry).
 
-Another issue is that as a developer I don't really want to deeply understand OpenAPI spec, which is IMHO quite verbose. The library
-should do as much heavy lifting as possible, ideally with a less convenient fallback.
+## Features
 
-That's why I wrote this library, I will try to talk to Hono maintainers and see if they'd be interested in adopting this package into their
-middleware, either as another option or perhaps as a new major version of the existing one.
-At the moment it's pretty immature but we'll get there.
+- Super simple usage - just add a middleware and that's it!
+- Ability to generate OpenAPI docs both using simple, almost exclusively Zod schema-based notation, or with regular OpenAPI spec
+- Request validation - same functionality as `@hono/zod-validator` (we're using it as a dependency)
+
+## Stability
+
+⚠ Warning: This library is still at the early stages although I would consider the documented API rather stable since version 0.2.0.
+In any case, please be aware that until I release v1.0.0 there might still be some breaking changes between minor versions.
 
 ## Usage
 
@@ -56,9 +51,180 @@ or [registering OpenAPI components](https://github.com/samchungy/zod-openapi/tre
 
 ### Middleware
 
-`hono-zod-openapi` provides a middleware which you can attach to any endpoint and it functions similarly to `zValidator`.
-The main difference is that you need to also provide a Zod schema for the response type.
-At the moment, the response value is **not** processed by Zod, it's only as a documentation.
+`hono-zod-openapi` provides a middleware which you can attach to any endpoint.
+It accepts a single argument, an object that is mostly the same as the [OpenAPI Operation Object](https://swagger.io/specification/#operation-object).
+There are 2 main differences:
+
+- a `request` field, which functions essentially like a condensed version of `@hono/zod-validator`.
+  For example, `{ json: z.object() }` is equivalent to `zValidator('json', z.object())`. Passing multiple attributes to the object is equivalent to
+  calling multiple `zValidator`s.
+  At the same time, **it will translate the validation schemas to OpenAPI notation**.
+  There is no need to use `parameters` and `requestBody` fields at all (but it is still possible).
+
+- enhanced `responses` field which has essentially 4 variants:
+
+  - Passing a Zod schema directly. For simple APIs this is more than enough. `description` field
+    will be equal to the full HTTP status code (e.g. `200 OK` or `500 Internal Server Error`) and
+    media type will be inferred based on the passed schema, though it is pretty simple now - for
+    `z.string()` it will be `text/plain`, otherwise it's `application/json`.
+
+    Example:
+
+    ```ts
+    openApi({
+      responses: {
+        200: z
+          .object({ wow: z.string() })
+          .openapi({ example: { wow: 'this is cool!' } }),
+      },
+    });
+    ```
+
+    <details>
+    <summary>This will be equivalent to this OpenAPI spec:</summary>
+
+    ```json
+    {
+      "responses": {
+        "200": {
+          "description": "200 OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "wow": "this is cool!"
+                },
+                "properties": {
+                  "wow": {
+                    "type": "string"
+                  }
+                },
+                "required": ["wow"],
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    }
+    ```
+
+    </details>
+
+  - "Library notation" - a simplified, flattened format, similar to the official OpenAPI spec,
+    but reduces annoying nesting. Convenient form if you want a custom description or need to pass
+    extra data.
+
+    Example:
+
+    ```ts
+    openApi({
+      responses: {
+        200: {
+          // the only required field! Use .openapi() method on the schema to add metadata
+          schema: z.string().openapi({
+            description: 'HTML code',
+            example: '<html><body>hi!</body></html>',
+          }),
+          // description is optional, as opposed to OpenAPI spec
+          description: 'My description',
+          // mediaType is optional, it's `text/plain` if schema is z.string()
+          // otherwise it's `application/json`, in other scenarios it should be specified
+          mediaType: 'text/html',
+          // headers field is also optional, but you can also use Zod schema here
+          headers: z.object({ 'x-custom': z.string() }),
+          // ...you can also pass all the other fields you normally would here in OpenAPI spec
+        },
+      },
+    });
+    ```
+
+    <details>
+    <summary>This will be equivalent to this OpenAPI spec:</summary>
+
+    ```json
+    {
+      "responses": {
+        "200": {
+          "content": {
+            "text/html": {
+              "schema": {
+                "description": "HTML code",
+                "example": "<html><body>hi!</body></html>",
+                "type": "string"
+              }
+            }
+          },
+          "description": "My description",
+          "headers": {
+            "x-custom": {
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+    ```
+
+    </details>
+
+  - `zod-openapi` notation. Mostly useful when you need to have `content` in multiple formats,
+    or you just want to be as close as possible to the official spec.
+
+    Example:
+
+    ```ts
+    openApi({
+      responses: {
+        200: {
+          // required
+          description: 'Success response',
+          content: {
+            'application/json': {
+              schema: z.object({ welcome: z.string() }),
+            },
+          },
+          // ...you can also pass all the other fields you normally would here in OpenAPI spec
+        },
+      },
+    });
+    ```
+
+    <details>
+    <summary>This will be equivalent to this OpenAPI spec:</summary>
+
+    ```json
+    {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "welcome": {
+                    "type": "string"
+                  }
+                },
+                "required": ["welcome"],
+                "type": "object"
+              }
+            }
+          },
+          "description": "Success response"
+        }
+      }
+    }
+    ```
+
+    </details>
+
+  - Classic OpenAPI spec notation: just [refer to the official spec](https://swagger.io/specification/#responses-object). Not recommended but it also just works.
+
+Since the object can get pretty large, you can use `defineOpenApiOperation` function to get
+the autocomplete in the IDE.
 
 Simple example:
 
@@ -69,103 +235,169 @@ import { createOpenApi, openApi } from 'hono-zod-openapi';
 
 export const app = new Hono().get(
   '/user',
-  openApi(
-    // response type
-    z.object({ hi: z.string() }),
-    {
+  openApi({
+    tags: ['User'],
+    responses: {
+      200: z.object({ hi: z.string() }).openapi({ example: { hi: 'user' } }),
+    },
+    request: {
       query: z.object({ id: z.string() }),
     },
-  ),
+  }),
   (c) => {
+    // works identically to @hono/zod-validator
     const { id } = c.req.valid('query');
     return c.json({ hi: id }, 200);
   },
 );
 
 // this will add a `GET /doc` route to the `app` router
-createOpenApi(app, {
-  title: 'Example API',
-  version: '1.0.0',
-});
-```
-
-Extensive example:
-
-```ts
-import { swaggerUI } from '@hono/swagger-ui';
-import { Hono } from 'hono';
-import { createOpenApi, openApi } from 'hono-zod-openapi';
-import { z } from 'zod';
-
-export const subRouter = new Hono().post(
-  '/example',
-  openApi(
-    // response schema, more verbose version
-    {
-      schema: z.object({ hi: z.string() }),
-      description: 'Great Success!',
-      status: 200,
-    },
-    // request validators
-    {
-      json: z.object({
-        day: z.string(),
-      }),
-    },
-  ),
-  (c) => {
-    // you can still use it the same way as with zValidator
-    const { day } = c.req.valid('json');
-
-    return c.json({ hi: `Hello on ${day}` }, 200);
-  },
-);
-
-export const app = new Hono()
-  // it also works with subrouters! don't wrap them in `createOpenApi`, though
-  .route('/sub', subRouter)
-  .get(
-    '/hello',
-    openApi(
-      // shorthand version - will represent 200 status
-      z.object({ hi: z.string() }),
-      {
-        query: z.object({ id: z.string() }),
-        // object form - you can skip validation by passing `validate: false`
-        // it will still appear in the OpenAPI document
-        header: {
-          schema: z.object({ Authorization: z.string() }),
-          validate: false,
-        },
-      },
-    ),
-    (c) => {
-      const { id } = c.req.valid('query');
-
-      // TypeScript would throw errors here because we don't want to validate the headers
-      // const { Authorization } = c.req.valid('header');
-
-      return c.json({ hi: id }, 200);
-    },
-  )
-  // you can use
-  .get('/docs', swaggerUI({ url: '/doc' }));
-
-const document = createOpenApi(
-  app,
-  {
+createOpenApiDocument(app, {
+  info: {
     title: 'Example API',
     version: '1.0.0',
   },
-  {
-    addRoute: false, // pass false here to *not* create the /doc route
-    overrides: (paths) => ({
-      // add some additional things to the OpenAPI doc
-      // you can modify the generated paths object
-    }),
-  },
-);
+});
+```
 
-// manually adding a route with the OpenAPI document
-app.get('/doc', (c) => c.json(document, 200));
+<details>
+<summary>Calling GET /doc will result in this response:</summary>
+
+```json
+{
+  "info": {
+    "title": "Example API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/user": {
+      "get": {
+        "tags": ["User"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "hi": "user"
+                  },
+                  "properties": {
+                    "hi": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["hi"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "200 OK"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+</details>
+
+## API
+
+### `createOpenApiDocument`
+
+```ts
+function createOpenApiDocument(
+  router: Hono,
+  document: Omit<ZodOpenApiObject, 'openapi'>,
+  { addRoute = true, routeName = '/doc' }: Settings = {},
+): ReturnType<typeof createDocument>;
+```
+
+Call this function after you defined your Hono app to generate the OpenAPI document and host it under `/doc` route by default. `info` field in the second argument is required by the OpenAPI specification. You can pass there also any other fields available in the OpenAPI specification, e.g. `servers`, `security` or `components`.
+
+Examples:
+
+- typical usage:
+
+  ```ts
+  createOpenApiDocument(app, {
+    info: {
+      title: 'Example API',
+      version: '1.0.0',
+    },
+  });
+  ```
+
+- add the route under /openApi route:
+
+  ```ts
+  createOpenApiDocument(
+    app,
+    {
+      info: {
+        title: 'Example API',
+        version: '1.0.0',
+      },
+    },
+    { routeName: '/openApi' },
+  );
+  ```
+
+- don't add the route, just get the OpenAPI document as an object
+  ```ts
+  const openApiDoc = createOpenApiDocument(
+    app,
+    {
+      info: {
+        title: 'Example API',
+        version: '1.0.0',
+      },
+    },
+    { addRoute: false },
+  );
+  ```
+
+### `openApi`
+
+```ts
+function openApi<Req extends RequestSchemas, E extends Env, P extends string>(
+  operation: Operation<Req>,
+): MiddlewareHandler<E, P, Values<Req>>;
+```
+
+A Hono middleware used to document a given endpoint. Refer to the [Middleware](#middleware) section above to see the usage examples.
+
+### `defineOpenApiOperation`
+
+A no-op function, used to ensure proper validator's type inference and provide autocomplete in cases where you don't want to define the spec inline.
+
+Example:
+
+```ts
+const operation = defineOpenApiOperation({
+  responses: {
+    200: z.object({ name: z.string() }),
+  },
+  request: {
+    json: z.object({ email: z.string() }),
+  },
+});
+
+const app = new Hono().post('/user', openApi(operation), async (c) => {
+  const { name } = c.req.valid('json');
+
+  return c.json({ name }, 200);
+});
 ```

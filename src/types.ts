@@ -3,8 +3,11 @@ import type {
   ValidationTargets as ValidationTargetsWithForm,
 } from 'hono';
 import type { StatusCode } from 'hono/utils/http-status';
-import { z } from 'zod';
-import type { ZodOpenApiOperationObject } from 'zod-openapi';
+import type { z } from 'zod';
+import type {
+  ZodOpenApiOperationObject,
+  ZodOpenApiResponseObject,
+} from 'zod-openapi';
 
 export type AnyZ = z.ZodType<any, z.ZodTypeDef, any>;
 
@@ -25,58 +28,19 @@ export type ValidationTargetParams<T extends AnyZ> = {
   validate?: boolean;
 };
 
-export type StatusCodePrefix = '1' | '2' | '3' | '4' | '5';
-export type StatusCodeWildcards = `${StatusCodePrefix}XX`;
-export type StatusCodeWithoutMinus1 = Exclude<StatusCode, -1>;
+type StatusCodePrefix = '1' | '2' | '3' | '4' | '5';
+type StatusCodeWithoutMinus1 = Exclude<StatusCode, -1>;
 export type StatusCodeWithWildcards =
   | StatusCodeWithoutMinus1
-  | StatusCodeWildcards
+  | `${StatusCodePrefix}XX`
   | 'default';
 
-export type ResponseParams<T extends AnyZ> = {
-  status: StatusCodeWithWildcards;
-  /**
-   * Zod schema for the response body. By default, it will only be used for documentation purposes.
-   * If you want to validate the response body, set the `validate` option to `true`, or create a middleware
-   * with the `createOpenApiMiddleware` function
-   */
-  schema: T;
-  /**
-   * Description of the response. When using the object, it must be manually provided.
-   */
-  description: string;
-  /**
-   * Response media type, usually determined by a method on Hono's context object, e.g. c.json(),
-   * or explicitly set with `Content-Type` header. If `validate` is `true`, the `Content-Type`
-   * response header will be validated against this value.
-   * @default `application/json`
-   */
-  mediaType?: string;
-  /**
-   * Determines whether the response body and media type should be validated.
-   * @default false
-   */
-  validate?: boolean;
-};
-
-export type ResponseSchemas =
-  | Array<ResponseParams<AnyZ>>
-  | ResponseParams<AnyZ>
-  | AnyZ;
 export type RequestSchemas = Partial<
   Record<RequestParam, ValidationTargetParams<AnyZ> | AnyZ>
 >;
 
 export type Method = 'get' | 'put' | 'post' | 'delete' | 'options' | 'patch';
-
-export type PathsSchemas = {
-  request: RequestSchemas;
-  response: NormalizedResponseSchemas;
-  endpointDetails: EndpointDetails;
-};
-
 export type NormalizedRequestSchemas = Partial<Record<RequestParam, AnyZ>>;
-export type NormalizedResponseSchemas = Array<ResponseParams<AnyZ>>;
 
 type HasUndefined<T> = undefined extends T ? true : false;
 type IsUnknown<T> = unknown extends T
@@ -88,23 +52,18 @@ type Clean<T> = {
   [K in keyof T as T[K] extends never ? never : K]: T[K];
 } & {};
 
-type TransformInput<
-  In,
-  Target extends keyof Omit<ValidationTargets, 'form'>,
-> = Target extends 'json'
-  ? In
-  : HasUndefined<keyof ValidationTargets[Target]> extends true
-    ? { [K in keyof In]?: ValidationTargets[Target][K] | undefined }
-    : { [K in keyof In]: ValidationTargets[Target][K] };
-
 type ExtractInValues<
   Schema extends AnyZ,
   Target extends keyof Omit<ValidationTargets, 'form'>,
   In = z.input<Schema>,
 > =
   HasUndefined<In> extends true
-    ? TransformInput<In, Target> | undefined
-    : TransformInput<In, Target>;
+    ? In extends ValidationTargets[Target]
+      ? In
+      : { [K2 in keyof In]?: ValidationTargets[Target][K2] }
+    : In extends ValidationTargets[Target]
+      ? In
+      : { [K2 in keyof In]: ValidationTargets[Target][K2] };
 
 type GetValidationSchemas<T extends RequestSchemas> = Clean<{
   [K in keyof T]: T[K] extends ValidationTargetParams<infer S>
@@ -145,3 +104,32 @@ export type EndpointDetails = Omit<
   ZodOpenApiOperationObject,
   'responses' | 'requestBody' | 'requestParams'
 >;
+
+export interface ReferenceObject {
+  $ref: string;
+  summary?: string;
+  description?: string;
+}
+
+interface SimpleResponseObject
+  extends Pick<ZodOpenApiResponseObject, 'links' | 'headers' | 'ref'> {
+  description?: string;
+  schema: AnyZ;
+  mediaType?: string;
+}
+
+export type HonoOpenApiResponseObject =
+  | ZodOpenApiResponseObject
+  | SimpleResponseObject
+  | AnyZ
+  | ReferenceObject;
+
+export type HonoOpenApiResponses = Partial<
+  Record<StatusCodeWithWildcards, HonoOpenApiResponseObject>
+>;
+
+export interface Operation<Req extends RequestSchemas = RequestSchemas>
+  extends Omit<ZodOpenApiOperationObject, 'requestParams' | 'responses'> {
+  request?: Req;
+  responses: HonoOpenApiResponses;
+}

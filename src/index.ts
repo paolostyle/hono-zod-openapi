@@ -1,3 +1,7 @@
 export { extendZodWithOpenApi } from 'zod-openapi';
-export { createOpenApiDocs, createOpenApiMiddleware, openApi } from './openapi';
-export type { ResponseParams, ValidationTargetParams } from './types';
+export { createOpenApiDocument } from './createOpenApiDocument';
+export {
+  createOpenApiMiddleware,
+  defineOpenApiOperation,
+  openApi,
+} from './openApi';

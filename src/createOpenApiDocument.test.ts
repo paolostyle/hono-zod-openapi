@@ -284,75 +284,9 @@ describe('createOpenApiDocument', () => {
     });
   });
 
-  it('x', async () => {
-    const app = new Hono().get(
-      '/user',
-      openApi({
-        responses: {
-          200: {
-            // required
-            description: 'Success response',
-            content: {
-              'application/json': {
-                schema: z.object({ welcome: z.string() }),
-              },
-            },
-            // ...you can also pass all the other fields you normally would here in OpenAPI spec
-          },
-        },
-      }),
-      (c) => {
-        // works identically to @hono/zod-validator
-        // const { id } = c.req.valid('query');
-        return c.json({ hi: '12' }, 200);
-      },
-    );
+  it('works with Hono instance with type parameters', () => {
+    const app = new Hono<{ Bindings: { env: 'test' } }>().basePath('/api');
 
-    // this will add a `GET /doc` route to the `app` router
-    createOpenApiDocument(app, {
-      info: {
-        title: 'Example API',
-        version: '1.0.0',
-      },
-    });
-
-    const response = await app.request('/doc');
-    const openApiSpec = await response.json();
-
-    expect(openApiSpec).toMatchInlineSnapshot(`
-      {
-        "info": {
-          "title": "Example API",
-          "version": "1.0.0",
-        },
-        "openapi": "3.1.0",
-        "paths": {
-          "/user": {
-            "get": {
-              "responses": {
-                "200": {
-                  "content": {
-                    "application/json": {
-                      "schema": {
-                        "properties": {
-                          "welcome": {
-                            "type": "string",
-                          },
-                        },
-                        "required": [
-                          "welcome",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Success response",
-                },
-              },
-            },
-          },
-        },
-      }
-    `);
+    createOpenApiDocument(app, documentData);
   });
 });

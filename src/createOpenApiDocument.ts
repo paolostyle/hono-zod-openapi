@@ -1,4 +1,4 @@
-import type { Hono } from 'hono';
+import type { Env, Hono, Schema } from 'hono';
 import { z } from 'zod';
 import {
   createDocument,
@@ -23,8 +23,12 @@ type Settings = {
   addRoute?: boolean;
 };
 
-export function createOpenApiDocument(
-  router: Hono,
+export function createOpenApiDocument<
+  E extends Env,
+  S extends Schema,
+  P extends string,
+>(
+  router: Hono<E, S, P>,
   document: Omit<ZodOpenApiObject, 'openapi'>,
   { addRoute = true, routeName = '/doc' }: Settings = {},
 ): ReturnType<typeof createDocument> {

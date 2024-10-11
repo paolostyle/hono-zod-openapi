@@ -10,6 +10,7 @@ import type {
   ZodOpenApiResponseObject,
 } from 'zod-openapi';
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type AnyZ = z.ZodType<any, z.ZodTypeDef, any>;
 
 export type ValidationTarget = 'json' | 'query' | 'param' | 'cookie' | 'header';
@@ -57,14 +58,13 @@ type ExtractInValues<
   Schema extends AnyZ,
   Target extends keyof Omit<ValidationTargets, 'form'>,
   In = z.input<Schema>,
-> =
-  HasUndefined<In> extends true
-    ? In extends ValidationTargets[Target]
-      ? In
-      : { [K2 in keyof In]?: ValidationTargets[Target][K2] }
-    : In extends ValidationTargets[Target]
-      ? In
-      : { [K2 in keyof In]: ValidationTargets[Target][K2] };
+> = HasUndefined<In> extends true
+  ? In extends ValidationTargets[Target]
+    ? In
+    : { [K2 in keyof In]?: ValidationTargets[Target][K2] }
+  : In extends ValidationTargets[Target]
+    ? In
+    : { [K2 in keyof In]: ValidationTargets[Target][K2] };
 
 type GetValidationSchemas<T extends RequestSchemas> = Clean<{
   [K in keyof T]: T[K] extends ValidationTargetParams<infer S>

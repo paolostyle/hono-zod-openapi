@@ -1,10 +1,10 @@
 import type { Env, Hono, Schema } from 'hono';
 import { z } from 'zod';
 import {
-  createDocument,
   type ZodOpenApiOperationObject,
   type ZodOpenApiPathsObject,
   type ZodOpenApiResponsesObject,
+  createDocument,
 } from 'zod-openapi';
 import { normalizeResponse } from './normalizeResponse';
 import { OpenApiSymbol } from './openApi';
@@ -34,26 +34,29 @@ export function createOpenApiDocument<
 ): ReturnType<typeof createDocument> {
   const paths: ZodOpenApiPathsObject = {};
 
-  router.routes
-    .filter((route) => OpenApiSymbol in route.handler)
-    .forEach((route) => {
-      const { request, responses, ...rest } = (route.handler as any)[
-        OpenApiSymbol
-      ] as Operation;
-      const path = `${route.method} ${route.path}`;
+  const decoratedRoutes = router.routes.filter(
+    (route) => OpenApiSymbol in route.handler,
+  );
 
-      const operation: ZodOpenApiOperationObject = {
-        responses: processResponses(responses, path),
-        ...(request ? processRequest(request) : {}),
-        ...rest,
-      };
+  for (const route of decoratedRoutes) {
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    const { request, responses, ...rest } = (route.handler as any)[
+      OpenApiSymbol
+    ] as Operation;
+    const path = `${route.method} ${route.path}`;
 
-      if (!(route.path in paths)) {
-        paths[route.path] = {};
-      }
+    const operation: ZodOpenApiOperationObject = {
+      responses: processResponses(responses, path),
+      ...(request ? processRequest(request) : {}),
+      ...rest,
+    };
 
-      paths[route.path][route.method.toLowerCase() as Method] = operation;
-    });
+    if (!(route.path in paths)) {
+      paths[route.path] = {};
+    }
+
+    paths[route.path][route.method.toLowerCase() as Method] = operation;
+  }
 
   const openApiDoc = createDocument({
     ...document,

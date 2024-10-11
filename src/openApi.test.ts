@@ -26,7 +26,7 @@ describe('object-based openApi middleware', () => {
     );
 
     const client = testClient(app);
-    const response = await client.user.$post({} as any);
+    const response = await client.user.$post({});
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ name: 'John' });
@@ -110,6 +110,7 @@ describe('object-based openApi middleware', () => {
       );
 
       const client = testClient(app);
+      // biome-ignore lint/suspicious/noExplicitAny: too much hassle for nothing
       await client.user.$post({} as any);
 
       expect(validatorMock).toHaveBeenCalledWith(type, someSchema);
@@ -142,6 +143,7 @@ describe('object-based openApi middleware', () => {
     );
 
     const client = testClient(app);
+    // biome-ignore lint/suspicious/noExplicitAny: too much hassle for nothing
     await client.user.$post({} as any);
 
     expect(validatorMock).toHaveBeenCalledWith('cookie', someSchema);
@@ -187,7 +189,7 @@ describe('object-based openApi middleware', () => {
     );
 
     const client = testClient(app);
-    await client.user.$post({} as any);
+    await client.user.$post({});
 
     expect(validatorMock).not.toHaveBeenCalled();
   });

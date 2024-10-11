@@ -313,6 +313,76 @@ createOpenApiDocument(app, {
 
 </details>
 
+## Recipes
+
+### Authentication
+
+Generally you just need to follow one of the Authentication guides [here](https://swagger.io/docs/specification/v3_0/authentication/),
+depending on the type of authentication you're using.
+
+Bearer Auth example:
+
+```ts
+const app = new Hono().get(
+  '/example',
+  openApi({
+    responses: {
+      200: z.object({}),
+    },
+    security: [{ bearerAuth: [] }],
+  }),
+  async (c) => {
+    return c.json({}, 200);
+  },
+);
+
+createOpenApiDocument(app, {
+  info: {
+    title: 'Some API',
+    version: '0.0.1',
+  },
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+      },
+    },
+  },
+  // if you use bearer auth in every endpoint, you can add
+  // this here instead of adding `security` to every route:
+  // security: [{ bearerAuth: [] }],
+});
+```
+
+### Reusing common fields
+
+Adding the same fields to various routes over an over can be a bit tedious. You can create your own typesafe wrapper, 
+which will provide the fields shared by multiple endpoints. For example, if a lot of your endpoints require a `security` field
+and a `tag`, you can create a function like this:
+
+```ts
+const taggedAuthRoute = <T extends HonoOpenApiRequestSchemas>(
+  doc: HonoOpenApiOperation<T>,
+) => {
+  return defineOpenApiOperation({
+    ...doc,
+    tags: ['MyTag'],
+    security: [{ apiKey: [] }],
+  });
+};
+```
+
+and use it with `openApi` middleware:
+
+```ts
+openApi(taggedAuthRoute({
+  request: {
+    json: z.object({ field: z.number() })
+  }
+}))
+```
+
 ## API
 
 ### `createOpenApiDocument`

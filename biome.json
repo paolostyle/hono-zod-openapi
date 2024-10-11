@@ -16,5 +16,23 @@
     "formatter": {
       "quoteStyle": "single"
     }
-  }
+  },
+  "overrides": [
+    {
+      "include": ["src/**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["package.json"],
+      "formatter": {
+        "lineWidth": 1
+      }
+    }
+  ]
 }

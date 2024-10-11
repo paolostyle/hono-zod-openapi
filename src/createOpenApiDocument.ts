@@ -10,11 +10,11 @@ import { normalizeResponse } from './normalizeResponse';
 import { OpenApiSymbol } from './openApi';
 import type {
   HonoOpenApiDocument,
+  HonoOpenApiOperation,
+  HonoOpenApiRequestSchemas,
   HonoOpenApiResponses,
   Method,
   NormalizedRequestSchemas,
-  Operation,
-  RequestSchemas,
   StatusCodeWithWildcards,
 } from './types';
 
@@ -42,7 +42,7 @@ export function createOpenApiDocument<
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     const { request, responses, ...rest } = (route.handler as any)[
       OpenApiSymbol
-    ] as Operation;
+    ] as HonoOpenApiOperation;
     const path = `${route.method} ${route.path}`;
 
     const operation: ZodOpenApiOperationObject = {
@@ -75,7 +75,7 @@ export function createOpenApiDocument<
 }
 
 export const processRequest = (
-  req: RequestSchemas,
+  req: HonoOpenApiRequestSchemas,
 ): Pick<ZodOpenApiOperationObject, 'requestBody' | 'requestParams'> => {
   const normalizedReq: NormalizedRequestSchemas = Object.fromEntries(
     Object.entries(req).map(

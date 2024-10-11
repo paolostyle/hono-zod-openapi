@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { extendZodWithOpenApi } from 'zod-openapi';
 import { createOpenApiDocument } from './createOpenApiDocument';
-import { openApi } from './openApi';
+import { defineOpenApiOperation, openApi } from './openApi';
+import type { HonoOpenApiOperation, HonoOpenApiRequestSchemas } from './types';
 
 extendZodWithOpenApi(z);
 
@@ -285,7 +286,33 @@ describe('createOpenApiDocument', () => {
   });
 
   it('works with Hono instance with type parameters', () => {
-    const app = new Hono<{ Bindings: { env: 'test' } }>().basePath('/api');
+    const taggedAuthRoute = <T extends HonoOpenApiRequestSchemas>(
+      tag: string,
+      doc: HonoOpenApiOperation<T>,
+    ) => {
+      return defineOpenApiOperation({
+        ...doc,
+        tags: [tag],
+        security: [{ apiKey: [] }],
+      });
+    };
+
+    const app = new Hono<{ Bindings: { env: 'test' } }>().basePath('/api').get(
+      '/example',
+      openApi(
+        taggedAuthRoute('auth', {
+          responses: {
+            200: z.object({ hi: z.string() }),
+          },
+          request: {
+            query: z.object({ name: z.string() }),
+          },
+        }),
+      ),
+      async (c) => {
+        const { name } = c.req.valid('query');
+      },
+    );
 
     createOpenApiDocument(app, documentData);
   });

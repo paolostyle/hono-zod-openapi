@@ -4,8 +4,8 @@ import { every } from 'hono/combine';
 import { createMiddleware } from 'hono/factory';
 import { z } from 'zod';
 import type {
-  Operation,
-  RequestSchemas,
+  HonoOpenApiOperation,
+  HonoOpenApiRequestSchemas,
   ValidationTarget,
   Values,
   ZodValidatorFn,
@@ -17,10 +17,12 @@ export function createOpenApiMiddleware(
   zodValidator: ZodValidatorFn = zValidator,
 ) {
   return function openApi<
-    Req extends RequestSchemas,
+    Req extends HonoOpenApiRequestSchemas,
     E extends Env,
     P extends string,
-  >(operation: Operation<Req>): MiddlewareHandler<E, P, Values<Req>> {
+  >(
+    operation: HonoOpenApiOperation<Req>,
+  ): MiddlewareHandler<E, P, Values<Req>> {
     const { request } = operation;
     const metadata = {
       [OpenApiSymbol]: operation,
@@ -56,6 +58,6 @@ export function createOpenApiMiddleware(
 
 export const openApi = createOpenApiMiddleware();
 
-export const defineOpenApiOperation = <Req extends RequestSchemas>(
-  operation: Operation<Req>,
+export const defineOpenApiOperation = <Req extends HonoOpenApiRequestSchemas>(
+  operation: HonoOpenApiOperation<Req>,
 ) => operation;

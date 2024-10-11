@@ -37,7 +37,7 @@ export type StatusCodeWithWildcards =
   | `${StatusCodePrefix}XX`
   | 'default';
 
-export type RequestSchemas = Partial<
+export type HonoOpenApiRequestSchemas = Partial<
   Record<RequestParam, ValidationTargetParams<AnyZ> | AnyZ>
 >;
 
@@ -66,7 +66,7 @@ type ExtractInValues<
     ? In
     : { [K2 in keyof In]: ValidationTargets[Target][K2] };
 
-type GetValidationSchemas<T extends RequestSchemas> = Clean<{
+type GetValidationSchemas<T extends HonoOpenApiRequestSchemas> = Clean<{
   [K in keyof T]: T[K] extends ValidationTargetParams<infer S>
     ? T[K]['validate'] extends false
       ? never
@@ -89,7 +89,7 @@ type ToValidatorValues<T extends ValidationSchemas> = {
   }>;
 };
 
-export type Values<T extends RequestSchemas> = ToValidatorValues<
+export type Values<T extends HonoOpenApiRequestSchemas> = ToValidatorValues<
   GetValidationSchemas<T>
 >;
 
@@ -129,8 +129,9 @@ export type HonoOpenApiResponses = Partial<
   Record<StatusCodeWithWildcards, HonoOpenApiResponseObject>
 >;
 
-export interface Operation<Req extends RequestSchemas = RequestSchemas>
-  extends Omit<ZodOpenApiOperationObject, 'requestParams' | 'responses'> {
+export interface HonoOpenApiOperation<
+  Req extends HonoOpenApiRequestSchemas = HonoOpenApiRequestSchemas,
+> extends Omit<ZodOpenApiOperationObject, 'requestParams' | 'responses'> {
   request?: Req;
   responses: HonoOpenApiResponses;
 }

@@ -8,5 +8,6 @@ export {
 export type {
   HonoOpenApiDocument,
   HonoOpenApiResponseObject,
-  Operation,
+  HonoOpenApiOperation,
+  HonoOpenApiRequestSchemas,
 } from './types';

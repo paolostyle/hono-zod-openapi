@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.3.0](https://github.com/paolostyle/hono-zod-openapi/compare/v0.2.1...v0.3.0) (2024-10-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* rename `Operation` type to `HonoOpenApiOperation` - technically breaking as it was exported, but realistically you wouldn't use it without a good reason.
+
+### Features
+
+* rename `Operation` type to `HonoOpenApiOperation`, export `HonoOpenApiRequestSchemas` ([e2bdda1](https://github.com/paolostyle/hono-zod-openapi/commit/e2bdda1439c61d106acf2d42a691024f17f3a3ef))
+
 ## [0.2.1](https://github.com/paolostyle/hono-zod-openapi/compare/v0.2.0...v0.2.1) (2024-10-11)
 
 
@@ -19,12 +30,12 @@ All notable changes to this project will be documented in this file. See [commit
 
 ### ⚠ BREAKING CHANGES
 
-* major rewrite, stabilized public API, decent test coverage
+* Major rewrite: please adjust your code to the latest version
 
 ### Features
 
 * major rewrite, stabilized public API, decent test coverage ([0f19085](https://github.com/paolostyle/hono-zod-openapi/commit/0f190855e2ca46777939b94681fdf91c4f7ff477))
-* response validator ([#1](https://github.com/paolostyle/hono-zod-openapi/issues/1)) ([12ed885](https://github.com/paolostyle/hono-zod-openapi/commit/12ed8854f7b351434dc7412e967f6f0632d9fbe1))
+* ~~response validator ([#1](https://github.com/paolostyle/hono-zod-openapi/issues/1)) ([12ed885](https://github.com/paolostyle/hono-zod-openapi/commit/12ed8854f7b351434dc7412e967f6f0632d9fbe1))~~
 
 ## [0.1.1](https://github.com/paolostyle/hono-zod-openapi/compare/0e7d2905992ed0df2e5ed39e6b231750b9f46c0d...v0.1.1) (2024-09-19)
 

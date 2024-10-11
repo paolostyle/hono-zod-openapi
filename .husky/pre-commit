@@ -1,1 +1,1 @@
-pnpm biome check --write --staged
+pnpm biome check --write --staged --no-errors-on-unmatched

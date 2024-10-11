@@ -5,6 +5,7 @@ import type {
 import type { StatusCode } from 'hono/utils/http-status';
 import type { z } from 'zod';
 import type {
+  ZodOpenApiObject,
   ZodOpenApiOperationObject,
   ZodOpenApiResponseObject,
 } from 'zod-openapi';
@@ -133,3 +134,5 @@ export interface Operation<Req extends RequestSchemas = RequestSchemas>
   request?: Req;
   responses: HonoOpenApiResponses;
 }
+
+export type HonoOpenApiDocument = Omit<ZodOpenApiObject, 'openapi'>;

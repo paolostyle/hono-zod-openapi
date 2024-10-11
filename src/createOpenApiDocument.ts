@@ -2,7 +2,6 @@ import type { Env, Hono, Schema } from 'hono';
 import { z } from 'zod';
 import {
   createDocument,
-  type ZodOpenApiObject,
   type ZodOpenApiOperationObject,
   type ZodOpenApiPathsObject,
   type ZodOpenApiResponsesObject,
@@ -10,6 +9,7 @@ import {
 import { normalizeResponse } from './normalizeResponse';
 import { OpenApiSymbol } from './openApi';
 import type {
+  HonoOpenApiDocument,
   HonoOpenApiResponses,
   Method,
   NormalizedRequestSchemas,
@@ -29,7 +29,7 @@ export function createOpenApiDocument<
   P extends string,
 >(
   router: Hono<E, S, P>,
-  document: Omit<ZodOpenApiObject, 'openapi'>,
+  document: HonoOpenApiDocument,
   { addRoute = true, routeName = '/doc' }: Settings = {},
 ): ReturnType<typeof createDocument> {
   const paths: ZodOpenApiPathsObject = {};

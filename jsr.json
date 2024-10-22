@@ -1,0 +1,15 @@
+{
+  "name": "@paolostyle/hono-zod-openapi",
+  "version": "0.3.0",
+  "exports": "./src/index.ts",
+  "publish": {
+    "include": [
+      "src/**/*.ts",
+      "package.json",
+      "LICENSE",
+      "README.md",
+      "CHANGELOG.md"
+    ],
+    "exclude": ["src/**/*.test.ts"]
+  }
+}

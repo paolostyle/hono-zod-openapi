@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import type { ZodOpenApiResponseObject } from 'zod-openapi';
-import { statusCodes } from './statusCodes';
+import { statusCodes } from './statusCodes.ts';
 import type {
   HonoOpenApiResponseObject,
   ReferenceObject,
   StatusCodeWithWildcards,
-} from './types';
+} from './types.ts';
 
 export const normalizeResponse = (
   res: HonoOpenApiResponseObject,

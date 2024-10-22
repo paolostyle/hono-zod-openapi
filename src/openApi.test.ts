@@ -7,7 +7,7 @@ import {
   createOpenApiMiddleware,
   defineOpenApiOperation,
   openApi,
-} from './openApi';
+} from './openApi.ts';
 
 extendZodWithOpenApi(z);
 

@@ -1,28 +1,21 @@
 import { zValidator } from '@hono/zod-validator';
-import type { Env, MiddlewareHandler } from 'hono';
 import { every } from 'hono/combine';
 import { createMiddleware } from 'hono/factory';
 import { z } from 'zod';
 import type {
+  HonoOpenApiMiddleware,
   HonoOpenApiOperation,
   HonoOpenApiRequestSchemas,
   ValidationTarget,
-  Values,
   ZodValidatorFn,
-} from './types';
+} from './types.ts';
 
 export const OpenApiSymbol = Symbol();
 
 export function createOpenApiMiddleware(
   zodValidator: ZodValidatorFn = zValidator,
-) {
-  return function openApi<
-    Req extends HonoOpenApiRequestSchemas,
-    E extends Env,
-    P extends string,
-  >(
-    operation: HonoOpenApiOperation<Req>,
-  ): MiddlewareHandler<E, P, Values<Req>> {
+): HonoOpenApiMiddleware {
+  return function openApi(operation) {
     const { request } = operation;
     const metadata = {
       [OpenApiSymbol]: operation,
@@ -56,7 +49,7 @@ export function createOpenApiMiddleware(
   };
 }
 
-export const openApi = createOpenApiMiddleware();
+export const openApi: HonoOpenApiMiddleware = createOpenApiMiddleware();
 
 export const defineOpenApiOperation = <Req extends HonoOpenApiRequestSchemas>(
   operation: HonoOpenApiOperation<Req>,

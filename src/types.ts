@@ -1,4 +1,5 @@
 import type {
+  Env,
   MiddlewareHandler,
   ValidationTargets as ValidationTargetsWithForm,
 } from 'hono';
@@ -137,3 +138,11 @@ export interface HonoOpenApiOperation<
 }
 
 export type HonoOpenApiDocument = Omit<ZodOpenApiObject, 'openapi'>;
+
+export type HonoOpenApiMiddleware = <
+  Req extends HonoOpenApiRequestSchemas,
+  E extends Env,
+  P extends string,
+>(
+  operation: HonoOpenApiOperation<Req>,
+) => MiddlewareHandler<E, P, Values<Req>>;

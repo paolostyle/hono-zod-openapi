@@ -11,5 +11,11 @@
       "CHANGELOG.md"
     ],
     "exclude": ["src/**/*.test.ts"]
+  },
+  "imports": {
+    "@hono/zod-validator": "npm:@hono/zod-validator@^0.4.1",
+    "hono": "jsr:@hono/hono@^4.6.3",
+    "zod": "npm:zod@^3.21.4",
+    "zod-openapi": "npm:zod-openapi@^3.0.1"
   }
 }

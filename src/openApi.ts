@@ -8,7 +8,7 @@ import type {
   HonoOpenApiRequestSchemas,
   ValidationTarget,
   ZodValidatorFn,
-} from './types';
+} from './types.ts';
 
 export const OpenApiSymbol = Symbol();
 

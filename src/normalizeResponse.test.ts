@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
-import { normalizeResponse } from './normalizeResponse';
-import type { HonoOpenApiResponseObject } from './types';
+import { normalizeResponse } from './normalizeResponse.ts';
+import type { HonoOpenApiResponseObject } from './types.ts';
 
 describe('normalize response', () => {
   beforeEach(() => {

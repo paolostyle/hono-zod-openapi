@@ -6,8 +6,8 @@ import {
   type ZodOpenApiResponsesObject,
   createDocument,
 } from 'zod-openapi';
-import { normalizeResponse } from './normalizeResponse';
-import { OpenApiSymbol } from './openApi';
+import { normalizeResponse } from './normalizeResponse.ts';
+import { OpenApiSymbol } from './openApi.ts';
 import type {
   HonoOpenApiDocument,
   HonoOpenApiOperation,
@@ -16,7 +16,7 @@ import type {
   Method,
   NormalizedRequestSchemas,
   StatusCodeWithWildcards,
-} from './types';
+} from './types.ts';
 
 type Settings = {
   routeName?: string;

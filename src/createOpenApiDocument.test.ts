@@ -2,9 +2,12 @@ import { Hono } from 'hono';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { extendZodWithOpenApi } from 'zod-openapi';
-import { createOpenApiDocument } from './createOpenApiDocument';
-import { defineOpenApiOperation, openApi } from './openApi';
-import type { HonoOpenApiOperation, HonoOpenApiRequestSchemas } from './types';
+import { createOpenApiDocument } from './createOpenApiDocument.ts';
+import { defineOpenApiOperation, openApi } from './openApi.ts';
+import type {
+  HonoOpenApiOperation,
+  HonoOpenApiRequestSchemas,
+} from './types.ts';
 
 extendZodWithOpenApi(z);
 

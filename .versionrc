@@ -5,7 +5,7 @@
       "type": "json"
     },
     {
-      "filename": "jsr.json",
+      "filename": "deno.json",
       "type": "json"
     }
   ]

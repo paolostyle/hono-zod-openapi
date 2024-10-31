@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.4.0](https://github.com/paolostyle/hono-zod-openapi/compare/v0.3.0...v0.4.0) (2024-10-31)
+
+
+### Features
+
+* JSR/Deno support ([#5](https://github.com/paolostyle/hono-zod-openapi/issues/5)) ([93316f3](https://github.com/paolostyle/hono-zod-openapi/commit/93316f38e7b23b74e3386227f65cbb682babd220))
+
 ## [0.3.1](https://github.com/paolostyle/hono-zod-openapi/compare/v0.3.0...v0.3.1) (2024-10-22)
 
 

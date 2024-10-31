@@ -1,9 +1,4 @@
 {
   ".": "0.3.1",
-  "extra-files": [
-    {
-      "filename": "deno.json",
-      "type": "json"
-    }
-  ]
+  "extra-files": ["deno.json"]
 }

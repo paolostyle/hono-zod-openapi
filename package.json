@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@hono/zod-validator": "^0.4.1",
-    "zod-openapi": "^3.0.1"
+    "zod-openapi": "^3.3.0"
   },
   "peerDependencies": {
     "hono": "^4.6.3",
@@ -49,15 +49,15 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.3",
-    "@hono/node-server": "^1.13.1",
+    "@hono/node-server": "^1.13.4",
     "@hono/swagger-ui": "^0.4.1",
     "@types/node": "^22.8.5",
-    "@vitest/coverage-v8": "^2.1.2",
-    "@vitest/ui": "2.1.2",
+    "@vitest/coverage-v8": "^2.1.4",
+    "@vitest/ui": "^2.1.4",
     "husky": "^9.1.6",
-    "tsup": "^8.3.0",
-    "typescript": "^5.6.2",
-    "vitest": "^2.1.2"
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
   },
   "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee"
 }

@@ -130,6 +130,10 @@ export type HonoOpenApiResponses = Partial<
   Record<StatusCodeWithWildcards, HonoOpenApiResponseObject>
 >;
 
+/**
+ * OpenAPI operation object, augmented with Zod-based request and response schemas.
+ * See README for exhaustive set of examples.
+ */
 export interface HonoOpenApiOperation<
   Req extends HonoOpenApiRequestSchemas = HonoOpenApiRequestSchemas,
 > extends Omit<ZodOpenApiOperationObject, 'requestParams' | 'responses'> {

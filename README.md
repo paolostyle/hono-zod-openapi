@@ -231,7 +231,7 @@ Simple example:
 ```ts
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { createOpenApi, openApi } from 'hono-zod-openapi';
+import { createOpenApiDocument, openApi } from 'hono-zod-openapi';
 
 export const app = new Hono().get(
   '/user',
@@ -357,7 +357,7 @@ createOpenApiDocument(app, {
 
 ### Reusing common fields
 
-Adding the same fields to various routes over an over can be a bit tedious. You can create your own typesafe wrapper, 
+Adding the same fields to various routes over an over can be a bit tedious. You can create your own typesafe wrapper,
 which will provide the fields shared by multiple endpoints. For example, if a lot of your endpoints require a `security` field
 and a `tag`, you can create a function like this:
 
@@ -376,11 +376,13 @@ const taggedAuthRoute = <T extends HonoOpenApiRequestSchemas>(
 and use it with `openApi` middleware:
 
 ```ts
-openApi(taggedAuthRoute({
-  request: {
-    json: z.object({ field: z.number() })
-  }
-}))
+openApi(
+  taggedAuthRoute({
+    request: {
+      json: z.object({ field: z.number() }),
+    },
+  }),
+);
 ```
 
 ## API

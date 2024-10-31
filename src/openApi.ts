@@ -12,6 +12,12 @@ import type {
 
 export const OpenApiSymbol = Symbol();
 
+/**
+ * Used internally to create the `openApi` middleware. You can use it if you have a custom `zod-validator` middleware,
+ * e.g. one that has a custom error handler. Otherwise, you probably don't need it and you should just use `openApi` instead.
+ * @param [zodValidator] `@hono/zod-validator`-compatible middleware
+ * @returns `openApi` middleware
+ */
 export function createOpenApiMiddleware(
   zodValidator: ZodValidatorFn = zValidator,
 ): HonoOpenApiMiddleware {
@@ -49,8 +55,35 @@ export function createOpenApiMiddleware(
   };
 }
 
+/**
+ * Hono middleware that documents decorated route. Additionally validates request body/query params/path params etc.,
+ * the same way `@hono/zod-validator` does.
+ *
+ * @see HonoOpenApiOperation for more information on how to use it.
+ */
 export const openApi: HonoOpenApiMiddleware = createOpenApiMiddleware();
 
+/**
+ * A no-op function, used to ensure proper validator's type inference and provide autocomplete in cases where you don't want to define the spec inline.
+ * @example
+ *
+ * ```ts
+ * const operation = defineOpenApiOperation({
+ *   responses: {
+ *     200: z.object({ name: z.string() }),
+ *   },
+ *   request: {
+ *     json: z.object({ email: z.string() }),
+ *   },
+ * });
+ *
+ * const app = new Hono().post('/user', openApi(operation), async (c) => {
+ *   const { name } = c.req.valid('json');
+ *
+ *   return c.json({ name }, 200);
+ * });
+ * ```
+ */
 export const defineOpenApiOperation = <Req extends HonoOpenApiRequestSchemas>(
   operation: HonoOpenApiOperation<Req>,
 ) => operation;

@@ -18,11 +18,58 @@ import type {
   StatusCodeWithWildcards,
 } from './types.ts';
 
-type Settings = {
-  routeName?: string;
+interface DocumentRouteSettings {
+  /**
+   * Whether to add a new route with the OpenAPI document.
+   * @default true
+   */
   addRoute?: boolean;
-};
+  /**
+   * Route name under which the OpenAPI document will be available, assuming `settings.addRoute` is `true`.
+   * @default '/doc'
+   */
+  routeName?: string;
+}
 
+/**
+ * Creates an OpenAPI document from a Hono router based on the routes decorated with `openApi` middleware.
+ * By default it will create a new route at `/doc` that returns the OpenAPI document.
+ * @param router Hono router containing routes decorated with `openApi` middleware
+ * @param document OpenAPI document base. An object with at least `info` property is required
+ * @param [routeSettings] Settings for the route that will serve the OpenAPI document
+ * @returns object representing the OpenAPI document
+ *
+ * @example
+ * ```ts
+ * import { Hono } from 'hono';
+ * import { z } from 'zod';
+ * import { createOpenApiDocument, openApi } from 'hono-zod-openapi';
+ *
+ * export const app = new Hono().get(
+ *   '/user',
+ *   openApi({
+ *     tags: ['User'],
+ *     responses: {
+ *       200: z.object({ hi: z.string() }).openapi({ example: { hi: 'user' } }),
+ *     },
+ *     request: {
+ *       query: z.object({ id: z.string() }),
+ *     },
+ *   }),
+ *   (c) => {
+ *     const { id } = c.req.valid('query');
+ *     return c.json({ hi: id }, 200);
+ *   },
+ * );
+ *
+ * createOpenApiDocument(app, {
+ *   info: {
+ *     title: 'Example API',
+ *     version: '1.0.0',
+ *   },
+ * });
+ * ```
+ */
 export function createOpenApiDocument<
   E extends Env,
   S extends Schema,
@@ -30,7 +77,7 @@ export function createOpenApiDocument<
 >(
   router: Hono<E, S, P>,
   document: HonoOpenApiDocument,
-  { addRoute = true, routeName = '/doc' }: Settings = {},
+  { addRoute = true, routeName = '/doc' }: DocumentRouteSettings = {},
 ): ReturnType<typeof createDocument> {
   const paths: ZodOpenApiPathsObject = {};
 
@@ -39,7 +86,7 @@ export function createOpenApiDocument<
   );
 
   for (const route of decoratedRoutes) {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // biome-ignore lint/suspicious/noExplicitAny: must be done this way as we're smuggling the metadata behind user's back
     const { request, responses, ...rest } = (route.handler as any)[
       OpenApiSymbol
     ] as HonoOpenApiOperation;

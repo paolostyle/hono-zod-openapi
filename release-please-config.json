@@ -1,0 +1,8 @@
+{
+  "$schema": "https://unpkg.com/release-please@16.12.0/schemas/config.json",
+  "pull-request-title-pattern": "chore: release ${version}",
+  "extra-files": ["deno.json"],
+  "packages": {
+    ".": {}
+  }
+}

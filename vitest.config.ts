@@ -5,7 +5,15 @@ export default defineConfig({
     coverage: {
       enabled: true,
       provider: 'v8',
-      reporter: ['text', 'html'],
+      reporter: process.env.CI
+        ? ['text', 'json-summary', 'json']
+        : ['text', 'html'],
+    },
+    reporters: process.env.CI
+      ? ['default', 'junit', 'github-actions']
+      : ['default'],
+    outputFile: {
+      junit: 'test-results/junit.xml',
     },
   },
 });

@@ -8,5 +8,6 @@ dist
 
 .idea
 coverage/
+test-results/
 .DS_Store
 .npmrc

@@ -1,8 +1,8 @@
 {
   "$schema": "https://unpkg.com/release-please@16.12.0/schemas/config.json",
-  "bootstrap-sha": "ee189fd60c32905c937cda2099dae7496d24e7f0",
   "pull-request-title-pattern": "chore: release ${version}",
   "extra-files": ["deno.json"],
+  "include-component-in-tag": false,
   "packages": {
     ".": {}
   }

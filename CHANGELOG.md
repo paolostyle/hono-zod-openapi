@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.4.0](https://github.com/paolostyle/hono-zod-openapi/compare/hono-zod-openapi-v0.3.1...hono-zod-openapi-v0.4.0) (2024-10-31)
+
+
+### Features
+
+* add basic JSDocs ([fd8bb84](https://github.com/paolostyle/hono-zod-openapi/commit/fd8bb8443344273d063c0b3ad87d95f61b66b244))
+
 ## [0.3.1](https://github.com/paolostyle/hono-zod-openapi/compare/v0.3.0...v0.3.1) (2024-10-22)
 
 ### Features

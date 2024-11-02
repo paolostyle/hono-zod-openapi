@@ -38,6 +38,10 @@ export type StatusCodeWithWildcards =
   | `${StatusCodePrefix}XX`
   | 'default';
 
+/**
+ * Mapping of zod-validator targets to their respective schemas, used both as a source of truth
+ * for validation and for OpenAPI documentation.
+ */
 export type HonoOpenApiRequestSchemas = Partial<
   Record<RequestParam, ValidationTargetParams<AnyZ> | AnyZ>
 >;
@@ -120,6 +124,9 @@ interface SimpleResponseObject
   mediaType?: string;
 }
 
+/**
+ * OpenAPI response object, augmented with Zod-based schema.
+ */
 export type HonoOpenApiResponseObject =
   | ZodOpenApiResponseObject
   | SimpleResponseObject
@@ -141,6 +148,10 @@ export interface HonoOpenApiOperation<
   responses: HonoOpenApiResponses;
 }
 
+/**
+ * zod-openapi document without `openapi` property (set to 3.1.0, we do not support lower versions).
+ * @see https://swagger.io/specification/
+ */
 export type HonoOpenApiDocument = Omit<ZodOpenApiObject, 'openapi'>;
 
 export type HonoOpenApiMiddleware = <

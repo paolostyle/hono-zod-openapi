@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.4.2](https://github.com/paolostyle/hono-zod-openapi/compare/v0.4.1...v0.4.2) (2024-11-02)
+
+
+### Miscellaneous Chores
+
+* release 0.4.2 ([356b8e9](https://github.com/paolostyle/hono-zod-openapi/commit/356b8e9894e3b28e12626d72895c5b7201e57a49))
+
 ## [0.4.1](https://github.com/paolostyle/hono-zod-openapi/compare/v0.4.0...v0.4.1) (2024-10-31)
 
 

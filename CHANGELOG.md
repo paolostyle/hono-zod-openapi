@@ -7,7 +7,8 @@ All notable changes to this project will be documented in this file. See [commit
 
 ### Miscellaneous Chores
 
-* release 0.4.2 ([356b8e9](https://github.com/paolostyle/hono-zod-openapi/commit/356b8e9894e3b28e12626d72895c5b7201e57a49))
+* fix JSR publishing through CI ([667f13b](https://github.com/paolostyle/hono-zod-openapi/commit/667f13b6cea0f29b6171f9c252b0d4767a01e23e))
+* include missing JSDocs to exported types ([5a50697](https://github.com/paolostyle/hono-zod-openapi/commit/5a506970fcb559c7a3b260dfa3e85c85bb890aa8))
 
 ## [0.4.1](https://github.com/paolostyle/hono-zod-openapi/compare/v0.4.0...v0.4.1) (2024-10-31)
 

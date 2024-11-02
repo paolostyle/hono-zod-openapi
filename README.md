@@ -1,11 +1,20 @@
 # hono-zod-openapi
 
+[![NPM Version](https://img.shields.io/npm/v/hono-zod-openapi)](https://npmjs.com/package/hono-zod-openapi)
+[![JSR Version](https://img.shields.io/jsr/v/%40paolostyle/hono-zod-openapi)](https://jsr.io/@paolostyle/hono-zod-openapi)
+
 Alternative Hono middleware for creating OpenAPI documentation from Zod schemas
 
 ## Installation
 
 ```
 npm install hono-zod-openapi hono zod
+```
+
+Or, if you prefer JSR:
+
+```
+jsr add @paolostyle/hono-zod-openapi
 ```
 
 ## Why?
@@ -586,3 +595,13 @@ const app = new Hono().post('/user', openApi(operation), async (c) => {
 ```
 
 </details>
+
+## Runtime compatibility
+
+While this package _should_ work in Bun, Deno, Cloudflare Workers and browsers (as I'm not using any platform specific APIs and I do not plan to),
+the codebase is currently tested against Node.js 18.x, 20.x and 22.x. I haven't found any tools that would help with
+cross-platform testing that wouldn't incur significant maintenance burden.
+
+For now I managed to successfully run the tests with Bun test runner with some grepping and used the lib in Cloudflare Workers
+and everything seemed to work fine. If you are using the library in non-Node runtime and encountered some bugs,
+please consider creating an issue.

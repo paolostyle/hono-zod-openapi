@@ -2,7 +2,10 @@ import { Hono } from 'hono';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { extendZodWithOpenApi } from 'zod-openapi';
-import { createOpenApiDocument } from './createOpenApiDocument.ts';
+import {
+  createOpenApiDocument,
+  normalizePathParams,
+} from './createOpenApiDocument.ts';
 import { defineOpenApiOperation, openApi } from './openApi.ts';
 import type {
   HonoOpenApiOperation,
@@ -318,5 +321,56 @@ describe('createOpenApiDocument', () => {
     );
 
     createOpenApiDocument(app, documentData);
+  });
+
+  it('normalizes path parameters correctly', async () => {
+    const app = new Hono().get(
+      '/user/:id',
+      openApi({
+        request: {
+          param: z.object({ id: z.string() }),
+        },
+        responses: {
+          200: z.object({ id: z.string() }),
+        },
+      }),
+      async (c) => {
+        const { id } = c.req.valid('param');
+        return c.json({ id }, 200);
+      },
+    );
+
+    createOpenApiDocument(app, documentData);
+
+    const response = await app.request('/doc');
+    const openApiSpec = await response.json();
+
+    expect(openApiSpec.paths['/user/{id}'].get.parameters).toEqual([
+      {
+        in: 'path',
+        name: 'id',
+        required: true,
+        schema: {
+          type: 'string',
+        },
+      },
+    ]);
+
+    expect(openApiSpec.paths['/user/{id}']).toBeDefined();
+  });
+});
+
+describe('normalizePathParams', () => {
+  it.each`
+    honoPath                                | openApiPath
+    ${':date{[0-9]+}'}                      | ${'{date}'}
+    ${'/post/:date{[0-9]+}/:title{[a-z]+}'} | ${'/post/{date}/{title}'}
+    ${'/posts/:filename{.+\\.png$}'}        | ${'/posts/{filename}'}
+    ${'/api/animal/:type?'}                 | ${'/api/animal/{type}'}
+    ${'/:kek-1'}                            | ${'/{kek-1}'}
+    ${'/:kek_id'}                           | ${'/{kek_id}'}
+    ${'/posts/:id/comment/:comment_id'}     | ${'/posts/{id}/comment/{comment_id}'}
+  `('normalizes $honoPath to $openApiPath', ({ honoPath, openApiPath }) => {
+    expect(normalizePathParams(honoPath)).toBe(openApiPath);
   });
 });

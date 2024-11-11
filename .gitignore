@@ -11,3 +11,6 @@ coverage/
 test-results/
 .DS_Store
 .npmrc
+
+# temporarily
+examples

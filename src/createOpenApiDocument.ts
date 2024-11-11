@@ -90,19 +90,21 @@ export function createOpenApiDocument<
     const { request, responses, ...rest } = (route.handler as any)[
       OpenApiSymbol
     ] as HonoOpenApiOperation;
-    const path = `${route.method} ${route.path}`;
+
+    const path = normalizePathParams(route.path);
+    const pathWithMethod = `${route.method} ${path}`;
 
     const operation: ZodOpenApiOperationObject = {
-      responses: processResponses(responses, path),
+      responses: processResponses(responses, pathWithMethod),
       ...(request ? processRequest(request) : {}),
       ...rest,
     };
 
-    if (!(route.path in paths)) {
-      paths[route.path] = {};
+    if (!(path in paths)) {
+      paths[path] = {};
     }
 
-    paths[route.path][route.method.toLowerCase() as Method] = operation;
+    paths[path][route.method.toLowerCase() as Method] = operation;
   }
 
   const openApiDoc = createDocument({
@@ -162,4 +164,8 @@ export const processResponses = (
       return [status, response];
     }),
   );
+};
+
+export const normalizePathParams = (path: string): string => {
+  return path.replace(/:([a-zA-Z0-9-_]+)\??(\{.*?\})?/g, '{$1}');
 };

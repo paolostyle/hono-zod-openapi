@@ -44,7 +44,7 @@
     "zod-openapi": "^3.3.0"
   },
   "peerDependencies": {
-    "hono": "^4.6.3",
+    "hono": "^4.6.10",
     "zod": "^3.21.4"
   },
   "devDependencies": {

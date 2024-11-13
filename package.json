@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@hono/zod-validator": "^0.4.1",
-    "zod-openapi": "^3.3.0"
+    "zod-openapi": "^4.0.0"
   },
   "peerDependencies": {
     "hono": "^4.6.10",

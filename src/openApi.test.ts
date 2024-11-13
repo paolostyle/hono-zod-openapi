@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { Hono, type MiddlewareHandler } from 'hono';
 import { testClient } from 'hono/testing';
 import { describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { z } from 'zod';
@@ -304,5 +304,37 @@ describe('object-based openApi middleware', () => {
         return c.json({ name: 'John' }, 200);
       },
     );
+  });
+
+  it('works properly with global middlewares', async () => {
+    const nextMiddleware: MiddlewareHandler = async (c, next) => {
+      await next();
+    };
+
+    const app = new Hono();
+    app.use('*', nextMiddleware);
+
+    app.get(
+      '/:id',
+      openApi({
+        request: {
+          param: z.object({
+            id: z.string(),
+          }),
+        },
+        responses: {
+          200: z.object({ id: z.string() }),
+        },
+      }),
+      (c) => {
+        const { id } = c.req.valid('param');
+        return c.json({ id }, 200);
+      },
+    );
+
+    const res = await app.request('/123');
+    const data = await res.json();
+
+    expect(data).toEqual({ id: '123' });
   });
 });

@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.5.0](https://github.com/paolostyle/hono-zod-openapi/compare/v0.4.2...v0.5.0) (2024-11-13)
+
+
+### Features
+
+* **deps:** upgrade zod-openapi to 4.0.0 ([5f93eed](https://github.com/paolostyle/hono-zod-openapi/commit/5f93eedcf3fa9b2fb957ed9c40e789f3b66ebd88))
+
+
+### Bug Fixes
+
+* adjust paths with params to the OpenAPI format ([0f52006](https://github.com/paolostyle/hono-zod-openapi/commit/0f520066f30f1e0a73ae9fc5f19c7a27a44da471))
+* require hono ^4.6.10 as it includes fix that closes [#15](https://github.com/paolostyle/hono-zod-openapi/issues/15) ([1617c09](https://github.com/paolostyle/hono-zod-openapi/commit/1617c097167680f6c8d4d4c6482c22f836116caf))
+
 ## [0.4.2](https://github.com/paolostyle/hono-zod-openapi/compare/v0.4.1...v0.4.2) (2024-11-02)
 
 

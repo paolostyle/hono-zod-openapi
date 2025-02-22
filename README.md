@@ -394,6 +394,41 @@ openApi(
 );
 ```
 
+### Custom error handling
+
+In general, `hono-zod-openapi` stays away from error handling and delegates it fully to `zod-validator`.
+`zod-validator`, however, accepts a third argument `hook`, using which you can intercept the validation result
+for every usage of the middleware. There is no direct equivalent for that in `hono-zod-openapi`,
+as in my experience it made more sense to create a custom middleware that wraps `zod-validator` and handles the
+errors in a unified way. That approach **is** supported. You can create your own `openApi` middleware using `createOpenApiMiddleware` - it's used internally to create `openApi` exported by the library.
+
+Example using an excellent `zod-validation-error` library that translates `ZodError`s into user friendly strings:
+```ts
+import { zValidator } from '@hono/zod-validator';
+import type { ValidationTargets } from 'hono';
+import { HTTPException } from 'hono/http-exception';
+import { createOpenApiMiddleware } from 'hono-zod-openapi';
+import type { ZodSchema } from 'zod';
+import { fromZodError } from 'zod-validation-error';
+
+const zodValidator = <S extends ZodSchema, T extends keyof ValidationTargets>(
+  target: T,
+  schema: S,
+) =>
+  zValidator(target, schema, (result, c) => {
+    if (!result.success) {
+      const validationError = fromZodError(result.error, { includePath: false });
+      // you can handle that in `new Hono().onError()` or just use e.g. `c.json()` directly instead
+      throw new HTTPException(400, { message: validationError.message, cause: validationError });
+    }
+  });
+
+// works exactly the same way as `openApi` exported by `hono-zod-openapi`
+export const openApi = createOpenApiMiddleware(zodValidator);
+```
+
+If there is a need for handling errors on a case-by-case basis - create an issue and let's try to find a sensible solution for that!
+
 ## API
 
 ### `createOpenApiDocument`
@@ -595,6 +630,16 @@ const app = new Hono().post('/user', openApi(operation), async (c) => {
 ```
 
 </details>
+
+### `createOpenApiMiddleware`
+
+```ts
+export function createOpenApiMiddleware(
+  zodValidator: ZodValidatorFn = zValidator,
+): HonoOpenApiMiddleware
+```
+
+Used internally to create `openApi` instance. You can use it if you need custom error handling on the middleware level.
 
 ## Runtime compatibility
 

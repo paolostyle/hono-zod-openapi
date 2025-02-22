@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@hono/zod-validator':
-        specifier: ^0.4.1
-        version: 0.4.1(hono@4.6.10)(zod@3.23.8)
+        specifier: ^0.4.3
+        version: 0.4.3(hono@4.6.10)(zod@3.23.8)
       hono:
         specifier: ^4.6.10
         version: 4.6.10
@@ -18,8 +18,8 @@ importers:
         specifier: ^3.21.4
         version: 3.23.8
       zod-openapi:
-        specifier: ^4.0.0
-        version: 4.0.0(zod@3.23.8)
+        specifier: ^4.2.3
+        version: 4.2.3(zod@3.23.8)
     devDependencies:
       '@biomejs/biome':
         specifier: 1.9.4
@@ -578,8 +578,8 @@ packages:
     peerDependencies:
       hono: '*'
 
-  '@hono/zod-validator@0.4.1':
-    resolution: {integrity: sha512-I8LyfeJfvVmC5hPjZ2Iij7RjexlgSBT7QJudZ4JvNPLxn0JQ3sqclz2zydlwISAnw21D2n4LQ0nfZdoiv9fQQA==}
+  '@hono/zod-validator@0.4.3':
+    resolution: {integrity: sha512-xIgMYXDyJ4Hj6ekm9T9Y27s080Nl9NXHcJkOvkXPhubOLj8hZkOL8pDnnXfvCf5xEE8Q4oMFenQUZZREUY2gqQ==}
     peerDependencies:
       hono: '>=3.9.0'
       zod: ^3.19.1
@@ -1482,8 +1482,8 @@ packages:
     engines: {node: '>= 14'}
     hasBin: true
 
-  zod-openapi@4.0.0:
-    resolution: {integrity: sha512-X/YT3VTYMon10rdTGApBIMPpSm17l/sxyVz3cao9M6ynv348ctYi62TDwdnDO+Po1YxA0KiguIW1gIGVRRGqvA==}
+  zod-openapi@4.2.3:
+    resolution: {integrity: sha512-i0SqpcdXfsvVWTIY1Jl3Tk421s9fBIkpXvaA86zDas+8FjfZjm+GX6ot6SPB2SyuHwUNTN02gE5uIVlYXlyrDQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.21.4
@@ -1772,7 +1772,7 @@ snapshots:
     dependencies:
       hono: 4.6.10
 
-  '@hono/zod-validator@0.4.1(hono@4.6.10)(zod@3.23.8)':
+  '@hono/zod-validator@0.4.3(hono@4.6.10)(zod@3.23.8)':
     dependencies:
       hono: 4.6.10
       zod: 3.23.8
@@ -1941,7 +1941,7 @@ snapshots:
 
   agent-base@7.1.1:
     dependencies:
-      debug: 4.3.7
+      debug: 4.4.0
     transitivePeerDependencies:
       - supports-color
     optional: true
@@ -2190,7 +2190,7 @@ snapshots:
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.7
+      debug: 4.4.0
     transitivePeerDependencies:
       - supports-color
     optional: true
@@ -2198,7 +2198,7 @@ snapshots:
   https-proxy-agent@7.0.5:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.7
+      debug: 4.4.0
     transitivePeerDependencies:
       - supports-color
     optional: true
@@ -2709,7 +2709,7 @@ snapshots:
   yaml@2.5.1:
     optional: true
 
-  zod-openapi@4.0.0(zod@3.23.8):
+  zod-openapi@4.2.3(zod@3.23.8):
     dependencies:
       zod: 3.23.8
 

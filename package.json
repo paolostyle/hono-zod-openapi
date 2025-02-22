@@ -28,6 +28,9 @@
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts",
     "lint": "biome check",
@@ -40,8 +43,8 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@hono/zod-validator": "^0.4.1",
-    "zod-openapi": "^4.0.0"
+    "@hono/zod-validator": "^0.4.3",
+    "zod-openapi": "^4.2.3"
   },
   "peerDependencies": {
     "hono": "^4.6.10",

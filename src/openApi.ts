@@ -1,7 +1,7 @@
 import { zValidator } from '@hono/zod-validator';
 import { every } from 'hono/combine';
 import { createMiddleware } from 'hono/factory';
-import { z } from 'zod';
+import * as z from 'zod';
 import type {
   HonoOpenApiMiddleware,
   HonoOpenApiOperation,
@@ -37,7 +37,7 @@ export function createOpenApiMiddleware(
     const validators = Object.entries(request)
       .map(([target, schemaOrParams]) => {
         const schema =
-          schemaOrParams instanceof z.Schema
+          schemaOrParams instanceof z.ZodType
             ? schemaOrParams
             : schemaOrParams.validate !== false
               ? schemaOrParams.schema

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { z } from 'zod';
+import * as z from 'zod';
 import { normalizeResponse } from './normalizeResponse.ts';
 import type { HonoOpenApiResponseObject } from './types.ts';
 

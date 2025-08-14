@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod';
 import type { ZodOpenApiResponseObject } from 'zod-openapi';
 import { statusCodes } from './statusCodes.ts';
 import type {
@@ -12,7 +12,7 @@ export const normalizeResponse = (
   status: StatusCodeWithWildcards,
   path: string,
 ): ZodOpenApiResponseObject | ReferenceObject => {
-  if (res instanceof z.Schema) {
+  if (res instanceof z.ZodType) {
     const contentType =
       res instanceof z.ZodString ? 'text/plain' : 'application/json';
 

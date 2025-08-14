@@ -1,4 +1,3 @@
-export { extendZodWithOpenApi } from 'zod-openapi';
 export { createOpenApiDocument } from './createOpenApiDocument.ts';
 export {
   createOpenApiMiddleware,

@@ -41,23 +41,6 @@ In any case, please be aware that until I release v1.0.0 there might still be so
 
 This library is based on [`zod-openapi`](https://github.com/samchungy/zod-openapi) library (not the same one as the official package).
 
-### Extending Zod
-
-`zod-openapi` provides an extension to Zod, which adds [a new `.openapi()` method](https://github.com/samchungy/zod-openapi/tree/master?tab=readme-ov-file#openapi).
-`hono-zod-openapi` reexports the `extendZodWithOpenApi` method. Call it ideally somewhere in your entry point (e.g. in a file with your main Hono router).
-
-```ts
-import { z } from 'zod';
-import { extendZodWithOpenApi } from 'hono-zod-openapi';
-
-extendZodWithOpenApi(z);
-
-z.string().openapi({ description: 'hello world!', example: 'hello world' });
-```
-
-This is not strictly necessary, but it allows you to add additional information that cannot be represented by just using Zod,
-or [registering OpenAPI components](https://github.com/samchungy/zod-openapi/tree/master?tab=readme-ov-file#auto-registering-schema).
-
 ### Middleware
 
 `hono-zod-openapi` provides a middleware which you can attach to any endpoint.
@@ -84,7 +67,7 @@ There are 2 main differences:
       responses: {
         200: z
           .object({ wow: z.string() })
-          .openapi({ example: { wow: 'this is cool!' } }),
+          .meta({ example: { wow: 'this is cool!' } }),
       },
     });
     ```
@@ -130,8 +113,8 @@ There are 2 main differences:
     openApi({
       responses: {
         200: {
-          // the only required field! Use .openapi() method on the schema to add metadata
-          schema: z.string().openapi({
+          // the only required field! Use .meta() method on the schema to add metadata
+          schema: z.string().meta({
             description: 'HTML code',
             example: '<html><body>hi!</body></html>',
           }),
@@ -239,7 +222,7 @@ Simple example:
 
 ```ts
 import { Hono } from 'hono';
-import { z } from 'zod';
+import * as z from 'zod';
 import { createOpenApiDocument, openApi } from 'hono-zod-openapi';
 
 export const app = new Hono().get(
@@ -247,7 +230,7 @@ export const app = new Hono().get(
   openApi({
     tags: ['User'],
     responses: {
-      200: z.object({ hi: z.string() }).openapi({ example: { hi: 'user' } }),
+      200: z.object({ hi: z.string() }).meta({ example: { hi: 'user' } }),
     },
     request: {
       query: z.object({ id: z.string() }),
@@ -408,10 +391,10 @@ import { zValidator } from '@hono/zod-validator';
 import type { ValidationTargets } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { createOpenApiMiddleware } from 'hono-zod-openapi';
-import type { ZodSchema } from 'zod';
 import { fromZodError } from 'zod-validation-error';
+import * as z from 'zod';
 
-const zodValidator = <S extends ZodSchema, T extends keyof ValidationTargets>(
+const zodValidator = <S extends z.ZodType, T extends keyof ValidationTargets>(
   target: T,
   schema: S,
 ) =>

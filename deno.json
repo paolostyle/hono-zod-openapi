@@ -15,9 +15,9 @@
     ]
   },
   "imports": {
-    "@hono/zod-validator": "npm:@hono/zod-validator@^0.4.3",
-    "hono": "npm:hono@^4.6.3",
-    "zod": "npm:zod@^3.21.4",
-    "zod-openapi": "npm:zod-openapi@^4.2.3"
+    "@hono/zod-validator": "npm:@hono/zod-validator@^0.7.3",
+    "hono": "npm:hono@^4.8.0",
+    "zod": "npm:zod@^4.0.0",
+    "zod-openapi": "npm:zod-openapi@^5.4.2"
   }
 }

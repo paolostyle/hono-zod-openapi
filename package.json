@@ -1,6 +1,6 @@
 {
   "name": "hono-zod-openapi",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Alternative Hono middleware for creating OpenAPI documentation from Zod schemas",
   "author": "Paweł Dąbrowski <dabrowskip9@gmail.com>",
   "homepage": "https://github.com/paolostyle/hono-zod-openapi#readme",

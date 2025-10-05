@@ -43,12 +43,12 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@hono/zod-validator": "^0.7.2",
-    "zod-openapi": "^5.3.1"
+    "@hono/zod-validator": "^0.7.3",
+    "zod-openapi": "^5.4.2"
   },
   "peerDependencies": {
     "hono": "^4.8.0",
-    "zod": "^3.25.74 || ^4.0.0"
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -62,13 +62,7 @@
     "tsx": "^4.19.3",
     "typescript": "^5.7.3",
     "vitest": "^3.0.6",
-    "zod": "4.0.14"
+    "zod": "^4.1.11"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@biomejs/biome",
-      "esbuild"
-    ]
-  },
-  "packageManager": "pnpm@10.4.1+sha512.c753b6c3ad7afa13af388fa6d808035a008e30ea9993f58c6663e2bc5ff21679aa834db094987129aa4d488b86df57f7b634981b2f827cdcacc698cc0cfb88af"
+  "packageManager": "pnpm@10.18.0+sha512.e804f889f1cecc40d572db084eec3e4881739f8dec69c0ff10d2d1beff9a4e309383ba27b5b750059d7f4c149535b6cd0d2cb1ed3aeb739239a4284a68f40cfa"
 }

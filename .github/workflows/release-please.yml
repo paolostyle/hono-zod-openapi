@@ -23,6 +23,8 @@ jobs:
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created }}
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -32,8 +34,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          registry-url: "https://registry.npmjs.org"
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: pnpm install
@@ -42,6 +44,7 @@ jobs:
         run: pnpm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
 
   jsr-publish:
     needs: release-please

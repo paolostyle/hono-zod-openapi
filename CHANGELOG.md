@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.0](https://github.com/paolostyle/hono-zod-openapi/compare/v0.5.0...v1.0.0) (2025-10-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* require node v20 as v18 is deprecated already
+* **deps:** enforce zod v4 usage
+
+### Miscellaneous Chores
+
+* **deps:** enforce zod v4 usage ([1d5fa2d](https://github.com/paolostyle/hono-zod-openapi/commit/1d5fa2d0c1c81ac436562ab237e0da3b33d93fae))
+* require node v20 as v18 is deprecated already ([f32b6d3](https://github.com/paolostyle/hono-zod-openapi/commit/f32b6d3b258f8ae3b4cbdd3189261ca7ef9f19ff))
+
 ## [0.5.0](https://github.com/paolostyle/hono-zod-openapi/compare/v0.4.2...v0.5.0) (2024-11-13)
 
 

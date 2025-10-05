@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
 import { describe, expect, it } from 'vitest';
-import { z } from 'zod';
-import { extendZodWithOpenApi } from 'zod-openapi';
+import * as z from 'zod';
 import {
   createOpenApiDocument,
   normalizePathParams,
@@ -11,8 +10,6 @@ import type {
   HonoOpenApiOperation,
   HonoOpenApiRequestSchemas,
 } from './types.ts';
-
-extendZodWithOpenApi(z);
 
 const documentData = {
   info: {
@@ -70,7 +67,7 @@ describe('createOpenApiDocument', () => {
       '/user',
       openApi({
         responses: {
-          200: z.object({ hi: z.string() }).openapi({
+          200: z.object({ hi: z.string() }).meta({
             example: { hi: 'henlo' },
           }),
         },
@@ -89,6 +86,7 @@ describe('createOpenApiDocument', () => {
       content: {
         'application/json': {
           schema: {
+            additionalProperties: false,
             example: {
               hi: 'henlo',
             },
@@ -112,7 +110,7 @@ describe('createOpenApiDocument', () => {
       openApi({
         responses: {
           200: {
-            schema: z.object({ hi: z.string() }).openapi({
+            schema: z.object({ hi: z.string() }).meta({
               example: { hi: 'henlo' },
             }),
             description: 'Great success',
@@ -133,6 +131,7 @@ describe('createOpenApiDocument', () => {
       content: {
         'application/json': {
           schema: {
+            additionalProperties: false,
             example: {
               hi: 'henlo',
             },
@@ -177,6 +176,7 @@ describe('createOpenApiDocument', () => {
       content: {
         'application/json': {
           schema: {
+            additionalProperties: false,
             properties: {
               wow: {
                 type: 'string',
@@ -194,6 +194,7 @@ describe('createOpenApiDocument', () => {
       content: {
         'application/json': {
           schema: {
+            additionalProperties: false,
             properties: {
               error: {
                 type: 'string',
@@ -235,16 +236,16 @@ describe('createOpenApiDocument', () => {
 
     expect(openApiSpec.paths['/example'].get.parameters).toEqual([
       {
-        in: 'query',
-        name: 'name',
+        in: 'cookie',
+        name: 'token',
         required: true,
         schema: {
           type: 'string',
         },
       },
       {
-        in: 'cookie',
-        name: 'token',
+        in: 'query',
+        name: 'name',
         required: true,
         schema: {
           type: 'string',

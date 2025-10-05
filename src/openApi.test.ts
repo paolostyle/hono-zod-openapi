@@ -1,15 +1,12 @@
 import { Hono, type MiddlewareHandler } from 'hono';
 import { testClient } from 'hono/testing';
 import { describe, expect, expectTypeOf, it, vi } from 'vitest';
-import { z } from 'zod';
-import { extendZodWithOpenApi } from 'zod-openapi';
+import * as z from 'zod';
 import {
   createOpenApiMiddleware,
   defineOpenApiOperation,
   openApi,
 } from './openApi.ts';
-
-extendZodWithOpenApi(z);
 
 describe('object-based openApi middleware', () => {
   it('works fine with request: undefined', async () => {
@@ -70,17 +67,10 @@ describe('object-based openApi middleware', () => {
     // @ts-expect-error name should be a string
     const response2 = await client.user.$post({ json: { name: 123 } });
     expect(response2.status).toBe(400);
-    expect(await response2.json()).toEqual({
+    const errorResponse = (await response2.json()) as any;
+    expect(errorResponse).toEqual({
       error: {
-        issues: [
-          {
-            code: 'invalid_type',
-            expected: 'string',
-            message: 'Expected string, received number',
-            path: ['name'],
-            received: 'number',
-          },
-        ],
+        message: expect.stringContaining('expected string, received number'),
         name: 'ZodError',
       },
       success: false,
@@ -236,7 +226,7 @@ describe('object-based openApi middleware', () => {
             description: 'Result is accepted',
             schema: z
               .object({ name: z.string() })
-              .openapi({ example: { name: 'John' } }),
+              .meta({ example: { name: 'John' } }),
           },
           // 2d. custom description, schema, explicit media type
           203: {
@@ -271,7 +261,7 @@ describe('object-based openApi middleware', () => {
               'application/json': {
                 schema: z
                   .object({ name: z.string() })
-                  .openapi({ example: { name: 'John' } }),
+                  .meta({ example: { name: 'John' } }),
               },
             },
           },

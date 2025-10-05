@@ -43,12 +43,12 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@hono/zod-validator": "^0.4.3",
-    "zod-openapi": "^4.2.3"
+    "@hono/zod-validator": "^0.7.2",
+    "zod-openapi": "^5.3.1"
   },
   "peerDependencies": {
-    "hono": "^4.6.10",
-    "zod": "^3.21.4"
+    "hono": "^4.8.0",
+    "zod": "^3.25.74 || ^4.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -61,7 +61,8 @@
     "tsup": "^8.3.6",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3",
-    "vitest": "^3.0.6"
+    "vitest": "^3.0.6",
+    "zod": "4.0.14"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

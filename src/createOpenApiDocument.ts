@@ -1,5 +1,5 @@
 import type { Env, Hono, Schema } from 'hono';
-import { z } from 'zod';
+import * as z from 'zod';
 import {
   type ZodOpenApiOperationObject,
   type ZodOpenApiPathsObject,
@@ -50,7 +50,7 @@ interface DocumentRouteSettings {
  *   openApi({
  *     tags: ['User'],
  *     responses: {
- *       200: z.object({ hi: z.string() }).openapi({ example: { hi: 'user' } }),
+ *       200: z.object({ hi: z.string() }).meta({ example: { hi: 'user' } }),
  *     },
  *     request: {
  *       query: z.object({ id: z.string() }),
@@ -129,17 +129,21 @@ export const processRequest = (
   const normalizedReq: NormalizedRequestSchemas = Object.fromEntries(
     Object.entries(req).map(
       ([key, value]) =>
-        [key, value instanceof z.Schema ? value : value.schema] as const,
+        [key, value instanceof z.ZodType ? value : value.schema] as const,
     ),
   );
 
-  return {
-    requestParams: {
+  const requestParams = Object.fromEntries(
+    Object.entries({
       cookie: normalizedReq.cookie,
       header: normalizedReq.header,
       query: normalizedReq.query,
       path: normalizedReq.param,
-    },
+    }).filter(([_, schema]) => schema !== undefined),
+  );
+
+  return {
+    requestParams,
     requestBody: normalizedReq.json && {
       content: {
         'application/json': {

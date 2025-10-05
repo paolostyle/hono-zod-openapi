@@ -4,7 +4,7 @@ import type {
   ValidationTargets as ValidationTargetsWithForm,
 } from 'hono';
 import type { StatusCode } from 'hono/utils/http-status';
-import type { z } from 'zod';
+import type * as z from 'zod';
 import type {
   ZodOpenApiObject,
   ZodOpenApiOperationObject,
@@ -12,7 +12,7 @@ import type {
 } from 'zod-openapi';
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-export type AnyZ = z.ZodType<any, z.ZodTypeDef, any>;
+export type AnyZ = z.ZodType<any, any>;
 
 export type ValidationTarget = 'json' | 'query' | 'param' | 'cookie' | 'header';
 type RequestParam = ValidationTarget;
@@ -118,7 +118,7 @@ export interface ReferenceObject {
 }
 
 interface SimpleResponseObject
-  extends Pick<ZodOpenApiResponseObject, 'links' | 'headers' | 'ref'> {
+  extends Pick<ZodOpenApiResponseObject, 'links' | 'headers' | 'id'> {
   description?: string;
   schema: AnyZ;
   mediaType?: string;

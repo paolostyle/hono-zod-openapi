@@ -19,45 +19,52 @@ jsr add @paolostyle/hono-zod-openapi
 
 ## Why?
 
-Hono provides a 3rd-party middleware in their [middleware](https://github.com/honojs/middleware/tree/main/packages/zod-openapi) monorepo,
-which probably works alright, however my issue with this package is that it forces you to write your code
-in a different manner than you normally would in Hono. Refactoring the app becomes a significant hassle.
+Hono provides a 3rd-party middleware in their
+[middleware](https://github.com/honojs/middleware/tree/main/packages/zod-openapi)
+monorepo, which probably works alright, however my issue with this package is
+that it forces you to write your code in a different manner than you normally
+would in Hono. Refactoring the app becomes a significant hassle.
 
-This library provides an `openApi` middleware instead, which you can easily add to your existing codebase, and a `createOpenApiDocument` function,
-which will generate an OpenAPI-compliant JSON document and serve it under `/doc` route of your app (it's configurable, don't worry).
+This library provides an `openApi` middleware instead, which you can easily add
+to your existing codebase, and a `createOpenApiDocument` function, which will
+generate an OpenAPI-compliant JSON document and serve it under `/doc` route of
+your app (it's configurable, don't worry).
 
 ## Features
 
 - Super simple usage - just add a middleware and that's it!
-- Ability to generate OpenAPI docs both using simple, almost exclusively Zod schema-based notation, or with regular OpenAPI spec
-- Request validation - same functionality as `@hono/zod-validator` (we're using it as a dependency)
-
-## Stability
-
-⚠ Warning: This library is still at the early stages although I would consider the documented API rather stable since version 0.2.0.
-In any case, please be aware that until I release v1.0.0 there might still be some breaking changes between minor versions.
+- Ability to generate OpenAPI docs both using simple, almost exclusively Zod
+  schema-based notation, or with regular OpenAPI spec
+- Request validation - same functionality as `@hono/zod-validator` (we're using
+  it as a dependency)
+- Fully compatible with Zod v4 (if you're still on Zod v3, please use v0.5.0)
 
 ## Usage
 
-This library is based on [`zod-openapi`](https://github.com/samchungy/zod-openapi) library (not the same one as the official package).
+This library is based on
+[`zod-openapi`](https://github.com/samchungy/zod-openapi) library (not the same
+one as the official package).
 
 ### Middleware
 
 `hono-zod-openapi` provides a middleware which you can attach to any endpoint.
-It accepts a single argument, an object that is mostly the same as the [OpenAPI Operation Object](https://swagger.io/specification/#operation-object).
+It accepts a single argument, an object that is mostly the same as the
+[OpenAPI Operation Object](https://swagger.io/specification/#operation-object).
 There are 2 main differences:
 
-- a `request` field, which functions essentially like a condensed version of `@hono/zod-validator`.
-  For example, `{ json: z.object() }` is equivalent to `zValidator('json', z.object())`. Passing multiple attributes to the object is equivalent to
-  calling multiple `zValidator`s.
-  At the same time, **it will translate the validation schemas to OpenAPI notation**.
-  There is no need to use `parameters` and `requestBody` fields at all (but it is still possible).
+- a `request` field, which functions essentially like a condensed version of
+  `@hono/zod-validator`. For example, `{ json: z.object() }` is equivalent to
+  `zValidator('json', z.object())`. Passing multiple attributes to the object is
+  equivalent to calling multiple `zValidator`s. At the same time, **it will
+  translate the validation schemas to OpenAPI notation**. There is no need to
+  use `parameters` and `requestBody` fields at all (but it is still possible).
 
 - enhanced `responses` field which has essentially 4 variants:
 
-  - Passing a Zod schema directly. For simple APIs this is more than enough. `description` field
-    will be equal to the full HTTP status code (e.g. `200 OK` or `500 Internal Server Error`) and
-    media type will be inferred based on the passed schema, though it is pretty simple now - for
+  - Passing a Zod schema directly. For simple APIs this is more than enough.
+    `description` field will be equal to the full HTTP status code (e.g.
+    `200 OK` or `500 Internal Server Error`) and media type will be inferred
+    based on the passed schema, though it is pretty simple now - for
     `z.string()` it will be `text/plain`, otherwise it's `application/json`.
 
     Example:
@@ -103,9 +110,9 @@ There are 2 main differences:
 
     </details>
 
-  - "Library notation" - a simplified, flattened format, similar to the official OpenAPI spec,
-    but reduces annoying nesting. Convenient form if you want a custom description or need to pass
-    extra data.
+  - "Library notation" - a simplified, flattened format, similar to the official
+    OpenAPI spec, but reduces annoying nesting. Convenient form if you want a
+    custom description or need to pass extra data.
 
     Example:
 
@@ -163,8 +170,9 @@ There are 2 main differences:
 
     </details>
 
-  - `zod-openapi` notation. Mostly useful when you need to have `content` in multiple formats,
-    or you just want to be as close as possible to the official spec.
+  - `zod-openapi` notation. Mostly useful when you need to have `content` in
+    multiple formats, or you just want to be as close as possible to the
+    official spec.
 
     Example:
 
@@ -213,10 +221,12 @@ There are 2 main differences:
 
     </details>
 
-  - Classic OpenAPI spec notation: just [refer to the official spec](https://swagger.io/specification/#responses-object). Not recommended but it also just works.
+  - Classic OpenAPI spec notation: just
+    [refer to the official spec](https://swagger.io/specification/#responses-object).
+    Not recommended but it also just works.
 
-Since the object can get pretty large, you can use `defineOpenApiOperation` function to get
-the autocomplete in the IDE.
+Since the object can get pretty large, you can use `defineOpenApiOperation`
+function to get the autocomplete in the IDE.
 
 Simple example:
 
@@ -309,8 +319,9 @@ createOpenApiDocument(app, {
 
 ### Authentication
 
-Generally you just need to follow one of the Authentication guides [here](https://swagger.io/docs/specification/v3_0/authentication/),
-depending on the type of authentication you're using.
+Generally you just need to follow one of the Authentication guides
+[here](https://swagger.io/docs/specification/v3_0/authentication/), depending on
+the type of authentication you're using.
 
 Bearer Auth example:
 
@@ -349,9 +360,10 @@ createOpenApiDocument(app, {
 
 ### Reusing common fields
 
-Adding the same fields to various routes over an over can be a bit tedious. You can create your own typesafe wrapper,
-which will provide the fields shared by multiple endpoints. For example, if a lot of your endpoints require a `security` field
-and a `tag`, you can create a function like this:
+Adding the same fields to various routes over an over can be a bit tedious. You
+can create your own typesafe wrapper, which will provide the fields shared by
+multiple endpoints. For example, if a lot of your endpoints require a `security`
+field and a `tag`, you can create a function like this:
 
 ```ts
 const taggedAuthRoute = <T extends HonoOpenApiRequestSchemas>(
@@ -379,13 +391,19 @@ openApi(
 
 ### Custom error handling
 
-In general, `hono-zod-openapi` stays away from error handling and delegates it fully to `zod-validator`.
-`zod-validator`, however, accepts a third argument `hook`, using which you can intercept the validation result
-for every usage of the middleware. There is no direct equivalent for that in `hono-zod-openapi`,
-as in my experience it made more sense to create a custom middleware that wraps `zod-validator` and handles the
-errors in a unified way. That approach **is** supported. You can create your own `openApi` middleware using `createOpenApiMiddleware` - it's used internally to create `openApi` exported by the library.
+In general, `hono-zod-openapi` stays away from error handling and delegates it
+fully to `zod-validator`. `zod-validator`, however, accepts a third argument
+`hook`, using which you can intercept the validation result for every usage of
+the middleware. There is no direct equivalent for that in `hono-zod-openapi`, as
+in my experience it made more sense to create a custom middleware that wraps
+`zod-validator` and handles the errors in a unified way. That approach **is**
+supported. You can create your own `openApi` middleware using
+`createOpenApiMiddleware` - it's used internally to create `openApi` exported by
+the library.
 
-Example using an excellent `zod-validation-error` library that translates `ZodError`s into user friendly strings:
+Example using an excellent `zod-validation-error` library that translates
+`ZodError`s into user friendly strings:
+
 ```ts
 import { zValidator } from '@hono/zod-validator';
 import type { ValidationTargets } from 'hono';
@@ -400,9 +418,14 @@ const zodValidator = <S extends z.ZodType, T extends keyof ValidationTargets>(
 ) =>
   zValidator(target, schema, (result, c) => {
     if (!result.success) {
-      const validationError = fromZodError(result.error, { includePath: false });
+      const validationError = fromZodError(result.error, {
+        includePath: false,
+      });
       // you can handle that in `new Hono().onError()` or just use e.g. `c.json()` directly instead
-      throw new HTTPException(400, { message: validationError.message, cause: validationError });
+      throw new HTTPException(400, {
+        message: validationError.message,
+        cause: validationError,
+      });
     }
   });
 
@@ -410,7 +433,8 @@ const zodValidator = <S extends z.ZodType, T extends keyof ValidationTargets>(
 export const openApi = createOpenApiMiddleware(zodValidator);
 ```
 
-If there is a need for handling errors on a case-by-case basis - create an issue and let's try to find a sensible solution for that!
+If there is a need for handling errors on a case-by-case basis - create an issue
+and let's try to find a sensible solution for that!
 
 ## API
 
@@ -424,7 +448,11 @@ function createOpenApiDocument(
 ): ReturnType<typeof createDocument>;
 ```
 
-Call this function after you defined your Hono app to generate the OpenAPI document and host it under `/doc` route by default. `info` field in the second argument is required by the OpenAPI specification. You can pass there also any other fields available in the OpenAPI specification, e.g. `servers`, `security` or `components`.
+Call this function after you defined your Hono app to generate the OpenAPI
+document and host it under `/doc` route by default. `info` field in the second
+argument is required by the OpenAPI specification. You can pass there also any
+other fields available in the OpenAPI specification, e.g. `servers`, `security`
+or `components`.
 
 Examples:
 
@@ -476,11 +504,13 @@ function openApi<Req extends RequestSchemas, E extends Env, P extends string>(
 ): MiddlewareHandler<E, P, Values<Req>>;
 ```
 
-A Hono middleware used to document a given endpoint. Refer to the [Middleware](#middleware) section above to see the usage examples.
+A Hono middleware used to document a given endpoint. Refer to the
+[Middleware](#middleware) section above to see the usage examples.
 
 ### `defineOpenApiOperation`
 
-A no-op function, used to ensure proper validator's type inference and provide autocomplete in cases where you don't want to define the spec inline.
+A no-op function, used to ensure proper validator's type inference and provide
+autocomplete in cases where you don't want to define the spec inline.
 
 Example:
 
@@ -619,17 +649,45 @@ const app = new Hono().post('/user', openApi(operation), async (c) => {
 ```ts
 export function createOpenApiMiddleware(
   zodValidator: ZodValidatorFn = zValidator,
-): HonoOpenApiMiddleware
+): HonoOpenApiMiddleware;
 ```
 
-Used internally to create `openApi` instance. You can use it if you need custom error handling on the middleware level.
+Used internally to create `openApi` instance. You can use it if you need custom
+error handling on the middleware level.
 
 ## Runtime compatibility
 
-While this package _should_ work in Bun, Deno, Cloudflare Workers and browsers (as I'm not using any platform specific APIs and I do not plan to),
-the codebase is currently tested against Node.js 18.x, 20.x and 22.x. I haven't found any tools that would help with
-cross-platform testing that wouldn't incur significant maintenance burden.
+While this package _should_ work in Bun, Deno, Cloudflare Workers and browsers
+(as I'm not using any platform specific APIs and I do not plan to), the codebase
+is currently tested against Node.js 20.x, 22.x and 24.x. I haven't found any
+tools that would help with cross-platform testing that wouldn't incur
+significant maintenance burden.
 
-For now I managed to successfully run the tests with Bun test runner with some grepping and used the lib in Cloudflare Workers
-and everything seemed to work fine. If you are using the library in non-Node runtime and encountered some bugs,
-please consider creating an issue.
+For now I managed to successfully run the tests with Bun test runner with some
+grepping and used the lib in Cloudflare Workers and everything seemed to work
+fine. If you are using the library in non-Node runtime and encountered some
+bugs, please consider creating an issue.
+
+## Contributing
+
+### Local setup
+
+Run the following set of commands to set up the project. Corepack is required to
+install the correct version of PNPM.
+
+```sh
+corepack enable
+corepack install
+pnpm i
+```
+
+Now you can run `pnpm test` to continuously run tests while developing.
+
+### Commit naming conventions
+
+At the moment of writing this, we don't have an automated setup for
+[conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) as none
+of the tooling I tried was really meeting my expectations, but Release Please,
+which takes care of the automated release process is using them to identify the
+need for releasing a new version. For now please try to do this manually
+(including in PR names), but automating this process would be great.

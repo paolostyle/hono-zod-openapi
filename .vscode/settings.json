@@ -2,11 +2,10 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.preferences.preferTypeOnlyAutoImports": true,
   "editor.codeActionsOnSave": {
-    "quickfix.biome": "explicit",
-    "source.organizeImports.biome": "explicit"
+    "source.fixAll.oxc": "explicit"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "typescript.preferences.importModuleSpecifierEnding": "js"
 }

@@ -86,7 +86,8 @@ export function createOpenApiDocument<
   );
 
   for (const route of decoratedRoutes) {
-    // biome-ignore lint/suspicious/noExplicitAny: must be done this way as we're smuggling the metadata behind user's back
+    // oxlint-disable typescript/no-explicit-any
+    // must be done this way as we're smuggling the metadata behind user's back
     const { request, responses, ...rest } = (route.handler as any)[
       OpenApiSymbol
     ] as HonoOpenApiOperation;

@@ -4,58 +4,51 @@ All notable changes to this project will be documented in this file. See [commit
 
 ## [1.0.1](https://github.com/paolostyle/hono-zod-openapi/compare/v1.0.0...v1.0.1) (2025-10-05)
 
-
 ### Bug Fixes
 
-* missing deno importmap version updates ([d0a2366](https://github.com/paolostyle/hono-zod-openapi/commit/d0a23668efabdad793709c873e4e03a5829ec590))
+- missing deno importmap version updates ([d0a2366](https://github.com/paolostyle/hono-zod-openapi/commit/d0a23668efabdad793709c873e4e03a5829ec590))
 
 ## [1.0.0](https://github.com/paolostyle/hono-zod-openapi/compare/v0.5.0...v1.0.0) (2025-10-05)
 
-
 ### ⚠ BREAKING CHANGES
 
-* require node v20 as v18 is deprecated already
-* **deps:** enforce zod v4 usage
+- require node v20 as v18 is deprecated already
+- **deps:** enforce zod v4 usage
 
 ### Miscellaneous Chores
 
-* **deps:** enforce zod v4 usage ([1d5fa2d](https://github.com/paolostyle/hono-zod-openapi/commit/1d5fa2d0c1c81ac436562ab237e0da3b33d93fae))
-* require node v20 as v18 is deprecated already ([f32b6d3](https://github.com/paolostyle/hono-zod-openapi/commit/f32b6d3b258f8ae3b4cbdd3189261ca7ef9f19ff))
+- **deps:** enforce zod v4 usage ([1d5fa2d](https://github.com/paolostyle/hono-zod-openapi/commit/1d5fa2d0c1c81ac436562ab237e0da3b33d93fae))
+- require node v20 as v18 is deprecated already ([f32b6d3](https://github.com/paolostyle/hono-zod-openapi/commit/f32b6d3b258f8ae3b4cbdd3189261ca7ef9f19ff))
 
 ## [0.5.0](https://github.com/paolostyle/hono-zod-openapi/compare/v0.4.2...v0.5.0) (2024-11-13)
 
-
 ### Features
 
-* **deps:** upgrade zod-openapi to 4.0.0 ([5f93eed](https://github.com/paolostyle/hono-zod-openapi/commit/5f93eedcf3fa9b2fb957ed9c40e789f3b66ebd88))
-
+- **deps:** upgrade zod-openapi to 4.0.0 ([5f93eed](https://github.com/paolostyle/hono-zod-openapi/commit/5f93eedcf3fa9b2fb957ed9c40e789f3b66ebd88))
 
 ### Bug Fixes
 
-* adjust paths with params to the OpenAPI format ([0f52006](https://github.com/paolostyle/hono-zod-openapi/commit/0f520066f30f1e0a73ae9fc5f19c7a27a44da471))
-* require hono ^4.6.10 as it includes fix that closes [#15](https://github.com/paolostyle/hono-zod-openapi/issues/15) ([1617c09](https://github.com/paolostyle/hono-zod-openapi/commit/1617c097167680f6c8d4d4c6482c22f836116caf))
+- adjust paths with params to the OpenAPI format ([0f52006](https://github.com/paolostyle/hono-zod-openapi/commit/0f520066f30f1e0a73ae9fc5f19c7a27a44da471))
+- require hono ^4.6.10 as it includes fix that closes [#15](https://github.com/paolostyle/hono-zod-openapi/issues/15) ([1617c09](https://github.com/paolostyle/hono-zod-openapi/commit/1617c097167680f6c8d4d4c6482c22f836116caf))
 
 ## [0.4.2](https://github.com/paolostyle/hono-zod-openapi/compare/v0.4.1...v0.4.2) (2024-11-02)
 
-
 ### Miscellaneous Chores
 
-* fix JSR publishing through CI ([667f13b](https://github.com/paolostyle/hono-zod-openapi/commit/667f13b6cea0f29b6171f9c252b0d4767a01e23e))
-* include missing JSDocs to exported types ([5a50697](https://github.com/paolostyle/hono-zod-openapi/commit/5a506970fcb559c7a3b260dfa3e85c85bb890aa8))
+- fix JSR publishing through CI ([667f13b](https://github.com/paolostyle/hono-zod-openapi/commit/667f13b6cea0f29b6171f9c252b0d4767a01e23e))
+- include missing JSDocs to exported types ([5a50697](https://github.com/paolostyle/hono-zod-openapi/commit/5a506970fcb559c7a3b260dfa3e85c85bb890aa8))
 
 ## [0.4.1](https://github.com/paolostyle/hono-zod-openapi/compare/v0.4.0...v0.4.1) (2024-10-31)
 
-
 ### Bug Fixes
 
-* use NPM version of Hono to unblock JSR release ([e9b13a5](https://github.com/paolostyle/hono-zod-openapi/commit/e9b13a53078104b61564a4a6b8899919830e9364))
+- use NPM version of Hono to unblock JSR release ([e9b13a5](https://github.com/paolostyle/hono-zod-openapi/commit/e9b13a53078104b61564a4a6b8899919830e9364))
 
 ## [0.4.0](https://github.com/paolostyle/hono-zod-openapi/compare/hono-zod-openapi-v0.3.1...hono-zod-openapi-v0.4.0) (2024-10-31)
 
-
 ### Features
 
-* add basic JSDocs ([fd8bb84](https://github.com/paolostyle/hono-zod-openapi/commit/fd8bb8443344273d063c0b3ad87d95f61b66b244))
+- add basic JSDocs ([fd8bb84](https://github.com/paolostyle/hono-zod-openapi/commit/fd8bb8443344273d063c0b3ad87d95f61b66b244))
 
 ## [0.3.1](https://github.com/paolostyle/hono-zod-openapi/compare/v0.3.0...v0.3.1) (2024-10-22)
 

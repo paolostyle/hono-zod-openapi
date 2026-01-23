@@ -43,7 +43,7 @@ export function createOpenApiMiddleware(
               ? schemaOrParams.schema
               : null;
 
-        if (!schema) return;
+        if (!schema) return null;
 
         return zodValidator(target as ValidationTarget, schema);
       })

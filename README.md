@@ -60,7 +60,6 @@ There are 2 main differences:
   use `parameters` and `requestBody` fields at all (but it is still possible).
 
 - enhanced `responses` field which has essentially 4 variants:
-
   - Passing a Zod schema directly. For simple APIs this is more than enough.
     `description` field will be equal to the full HTTP status code (e.g.
     `200 OK` or `500 Internal Server Error`) and media type will be inferred

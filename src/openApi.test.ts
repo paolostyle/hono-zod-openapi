@@ -46,13 +46,13 @@ describe('object-based openApi middleware', () => {
         expectTypeOf(body).toEqualTypeOf<{ name: string }>();
 
         // @ts-expect-error c.req.valid() should only accept json
-        const nonExistent = c.req.valid('cookie');
+        const _nonExistent = c.req.valid('cookie');
         // @ts-expect-error c.req.valid() should only accept json
-        const nonExistent2 = c.req.valid('header');
+        const _nonExistent2 = c.req.valid('header');
         // @ts-expect-error c.req.valid() should only accept json
-        const nonExistent3 = c.req.valid('query');
+        const _nonExistent3 = c.req.valid('query');
         // @ts-expect-error c.req.valid() should only accept json
-        const nonExistent4 = c.req.valid('param');
+        const _nonExistent4 = c.req.valid('param');
 
         return c.json(body, 200);
       },
@@ -162,15 +162,15 @@ describe('object-based openApi middleware', () => {
       }),
       async (c) => {
         // @ts-expect-error c.req.valid() should not accept any target
-        const body = c.req.valid('json');
+        const _body = c.req.valid('json');
         // @ts-expect-error c.req.valid() should not accept any target
-        const nonExistent = c.req.valid('cookie');
+        const _nonExistent = c.req.valid('cookie');
         // @ts-expect-error c.req.valid() should not accept any target
-        const nonExistent2 = c.req.valid('header');
+        const _nonExistent2 = c.req.valid('header');
         // @ts-expect-error c.req.valid() should not accept any target
-        const nonExistent3 = c.req.valid('query');
+        const _nonExistent3 = c.req.valid('query');
         // @ts-expect-error c.req.valid() should not accept any target
-        const nonExistent4 = c.req.valid('param');
+        const _nonExistent4 = c.req.valid('param');
 
         return c.json({ name: 'John' }, 200);
       },
@@ -204,6 +204,7 @@ describe('object-based openApi middleware', () => {
     });
   });
 
+  // oxlint-disable-next-line jest/expect-expect
   it('works on type-level with all possible response variants', () => {
     new Hono().post(
       '/user',
@@ -297,6 +298,7 @@ describe('object-based openApi middleware', () => {
   });
 
   it('works properly with global middlewares', async () => {
+    // oxlint-disable-next-line unicorn/consistent-function-scoping
     const nextMiddleware: MiddlewareHandler = async (c, next) => {
       await next();
     };

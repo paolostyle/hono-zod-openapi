@@ -10,9 +10,7 @@
       "README.md",
       "CHANGELOG.md"
     ],
-    "exclude": [
-      "src/**/*.test.ts"
-    ]
+    "exclude": ["src/**/*.test.ts"]
   },
   "imports": {
     "@hono/zod-validator": "npm:@hono/zod-validator@^0.7.3",

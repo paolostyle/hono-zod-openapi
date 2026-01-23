@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { describe, expect, it } from 'vitest';
+import { expectTypeOf, describe, expect, it } from 'vitest';
 import * as z from 'zod';
 import {
   createOpenApiDocument,
@@ -318,6 +318,7 @@ describe('createOpenApiDocument', () => {
       ),
       async (c) => {
         const { name } = c.req.valid('query');
+        expectTypeOf(name).toBeString();
       },
     );
 

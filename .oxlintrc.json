@@ -1,0 +1,75 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "unicorn",
+    "typescript",
+    "oxc",
+    "import",
+    "jest",
+    "node",
+    "promise",
+    "vitest"
+  ],
+  "categories": {
+    "correctness": "error",
+    "perf": "error",
+    "suspicious": "error"
+  },
+  "rules": {
+    // suspicious rules
+    "import/no-unassigned-import": [
+      "error",
+      { "allow": ["**/*.{css,svg,png,webp}"] }
+    ],
+    // restriction rules
+    "no-param-reassign": "error",
+    "no-plusplus": "error",
+    "no-regex-spaces": "error",
+    "no-sequences": "error",
+    "no-var": "error",
+    "no-void": "error",
+    "import/no-amd": "error",
+    "import/no-commonjs": "error",
+    "import/no-cycle": "error",
+    "import/no-dynamic-require": "error",
+    "import/no-webpack-loader-syntax": "error",
+    "oxc/bad-bitwise-operator": "error",
+    "oxc/no-barrel-file": "error",
+    "typescript/explicit-module-boundary-types": "off", // consider enabling
+    "typescript/no-dynamic-delete": "error",
+    "typescript/no-empty-object-type": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-import-type-side-effects": "error",
+    "typescript/no-namespace": "error",
+    "typescript/no-non-null-asserted-nullish-coalescing": "error",
+    "typescript/no-require-imports": "error",
+    "unicorn/no-abusive-eslint-disable": "error",
+    "unicorn/no-anonymous-default-export": "error",
+    "unicorn/no-length-as-slice-end": "error",
+    "unicorn/no-magic-array-flat-depth": "error",
+    "unicorn/prefer-node-protocol": "error",
+    "unicorn/prefer-number-properties": "error",
+    // pedantic
+    "array-callback-return": "error",
+    "typescript/prefer-ts-expect-error": "error",
+    // stylistic rules - only with autofixes
+    "prefer-object-spread": "error",
+    "prefer-template": "error",
+    "typescript/array-type": ["error", { "default": "array-simple" }],
+    "typescript/consistent-type-imports": "error",
+    "unicorn/prefer-keyboard-event-key": "error",
+    "vitest/no-import-node-test": "error",
+    "vitest/prefer-to-be-object": "error"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts"],
+      "rules": {
+        "typescript/no-explicit-any": "off"
+      }
+    }
+  ],
+  "env": {
+    "builtin": true
+  }
+}

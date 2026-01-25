@@ -1,4 +1,3 @@
-import type { Hook } from '@hono/zod-validator';
 import type {
   Env,
   MiddlewareHandler,
@@ -12,15 +11,12 @@ import type {
   ZodOpenApiResponseObject,
 } from 'zod-openapi';
 
-// oxlint-disable no-explicit-any
-export type AnyZ = z.ZodType<any, any>;
-
 export type ValidationTarget = 'json' | 'query' | 'param' | 'cookie' | 'header';
 type RequestParam = ValidationTarget;
-type ValidationSchemas = Partial<Record<ValidationTarget, AnyZ>>;
+type ValidationSchemas = Partial<Record<ValidationTarget, z.ZodType>>;
 type ValidationTargets = Omit<ValidationTargetsWithForm, 'form'>;
 
-export type ValidationTargetParams<T extends AnyZ> = {
+export type ValidationTargetParams<T extends z.ZodType> = {
   /**
    * Zod schema for the target.
    */
@@ -44,12 +40,11 @@ export type StatusCodeWithWildcards =
  * for validation and for OpenAPI documentation.
  */
 export type HonoOpenApiRequestSchemas = Partial<
-  Record<RequestParam, ValidationTargetParams<AnyZ> | AnyZ>
+  Record<RequestParam, ValidationTargetParams<z.ZodType> | z.ZodType>
 >;
 
 export type Method = 'get' | 'put' | 'post' | 'delete' | 'options' | 'patch';
-export type NormalizedRequestSchemas = Partial<Record<RequestParam, AnyZ>>;
-
+export type NormalizedRequestSchemas = Partial<Record<RequestParam, z.ZodType>>;
 type HasUndefined<T> = undefined extends T ? true : false;
 type IsUnknown<T> = unknown extends T
   ? [T] extends [null]
@@ -61,7 +56,7 @@ type Clean<T> = {
 } & {};
 
 type ExtractInValues<
-  Schema extends AnyZ,
+  Schema extends z.ZodType,
   Target extends keyof Omit<ValidationTargets, 'form'>,
   In = z.input<Schema>,
 > =
@@ -78,7 +73,7 @@ type GetValidationSchemas<T extends HonoOpenApiRequestSchemas> = Clean<{
     ? T[K]['validate'] extends false
       ? never
       : S
-    : T[K] extends AnyZ
+    : T[K] extends z.ZodType
       ? T[K]
       : never;
 }>;
@@ -101,12 +96,13 @@ export type Values<T extends HonoOpenApiRequestSchemas> = ToValidatorValues<
 >;
 
 export type ZodValidatorFn = <
-  S extends AnyZ,
+  S extends z.ZodType,
   T extends keyof ValidationTargets,
 >(
   target: T,
   schema: S,
-) => MiddlewareHandler;
+  // oxlint-disable-next-line no-explicit-any, no-empty-object-type
+) => MiddlewareHandler<any, string, {}, any>;
 
 export type EndpointDetails = Omit<
   ZodOpenApiOperationObject,
@@ -124,7 +120,7 @@ interface SimpleResponseObject extends Pick<
   'links' | 'headers' | 'id'
 > {
   description?: string;
-  schema: AnyZ;
+  schema: z.ZodType;
   mediaType?: string;
 }
 
@@ -134,7 +130,7 @@ interface SimpleResponseObject extends Pick<
 export type HonoOpenApiResponseObject =
   | ZodOpenApiResponseObject
   | SimpleResponseObject
-  | AnyZ
+  | z.ZodType
   | ReferenceObject;
 
 export type HonoOpenApiResponses = Partial<
@@ -164,5 +160,4 @@ export type HonoOpenApiMiddleware = <
   P extends string,
 >(
   operation: HonoOpenApiOperation<Req>,
-  errorHandler?: Hook<any, E, string>,
 ) => MiddlewareHandler<E, P, Values<Req>>;

@@ -13,9 +13,9 @@
     "exclude": ["src/**/*.test.ts"]
   },
   "imports": {
-    "@hono/zod-validator": "npm:@hono/zod-validator@^0.7.3",
-    "hono": "npm:hono@^4.8.0",
-    "zod": "npm:zod@^4.0.0",
-    "zod-openapi": "npm:zod-openapi@^5.4.2"
+    "@hono/zod-validator": "npm:@hono/zod-validator@^0.7.6",
+    "hono": "npm:hono@^4.11.4",
+    "zod": "npm:zod@^4.3.5",
+    "zod-openapi": "npm:zod-openapi@^5.4.6"
   }
 }

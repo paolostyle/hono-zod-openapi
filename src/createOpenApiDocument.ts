@@ -86,8 +86,8 @@ export function createOpenApiDocument<
   );
 
   for (const route of decoratedRoutes) {
-    // oxlint-disable typescript/no-explicit-any
     // must be done this way as we're smuggling the metadata behind user's back
+    // oxlint-disable-next-line typescript/no-explicit-any
     const { request, responses, ...rest } = (route.handler as any)[
       OpenApiSymbol
     ] as HonoOpenApiOperation;

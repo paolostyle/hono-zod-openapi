@@ -1,4 +1,6 @@
-import { Hono, type MiddlewareHandler } from 'hono';
+import { zValidator } from '@hono/zod-validator';
+import { Hono, type MiddlewareHandler, type ValidationTargets } from 'hono';
+import { HTTPException } from 'hono/http-exception';
 import { testClient } from 'hono/testing';
 import { describe, expect, expectTypeOf, it, vi } from 'vitest';
 import * as z from 'zod';
@@ -204,7 +206,6 @@ describe('object-based openApi middleware', () => {
     });
   });
 
-  // oxlint-disable-next-line jest/expect-expect
   it('works on type-level with all possible response variants', () => {
     new Hono().post(
       '/user',
@@ -328,5 +329,35 @@ describe('object-based openApi middleware', () => {
     const data = await res.json();
 
     expect(data).toEqual({ id: '123' });
+  });
+
+  it('createOpenApiMiddleware can accept zodValidator with hook', async () => {
+    createOpenApiMiddleware((target, schema) =>
+      zValidator(target, schema, (result, c) => {
+        if (!result.success) {
+          const validationError = z.prettifyError(result.error);
+          return c.json({ error: validationError });
+        }
+      }),
+    );
+
+    const zodValidator = <
+      S extends z.ZodType,
+      T extends keyof ValidationTargets,
+    >(
+      target: T,
+      schema: S,
+    ) =>
+      zValidator(target, schema, (result) => {
+        if (!result.success) {
+          const validationError = z.prettifyError(result.error);
+          throw new HTTPException(400, {
+            message: validationError,
+            cause: result.error,
+          });
+        }
+      });
+
+    createOpenApiMiddleware(zodValidator);
   });
 });

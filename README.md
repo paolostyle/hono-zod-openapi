@@ -405,16 +405,13 @@ Example using an excellent `zod-validation-error` library that translates
 
 ```ts
 import { zValidator } from '@hono/zod-validator';
-import type { ValidationTargets } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { createOpenApiMiddleware } from 'hono-zod-openapi';
 import { fromZodError } from 'zod-validation-error';
 import * as z from 'zod';
 
-const zodValidator = <S extends z.ZodType, T extends keyof ValidationTargets>(
-  target: T,
-  schema: S,
-) =>
+// works exactly the same way as `openApi` exported by `hono-zod-openapi`
+export const openApi = createOpenApiMiddleware((target, schema) =>
   zValidator(target, schema, (result, c) => {
     if (!result.success) {
       const validationError = fromZodError(result.error, {
@@ -426,10 +423,8 @@ const zodValidator = <S extends z.ZodType, T extends keyof ValidationTargets>(
         cause: validationError,
       });
     }
-  });
-
-// works exactly the same way as `openApi` exported by `hono-zod-openapi`
-export const openApi = createOpenApiMiddleware(zodValidator);
+  }),
+);
 ```
 
 If there is a need for handling errors on a case-by-case basis - create an issue

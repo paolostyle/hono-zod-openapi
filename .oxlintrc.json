@@ -33,6 +33,7 @@
     "import/no-cycle": "error",
     "import/no-dynamic-require": "error",
     "import/no-webpack-loader-syntax": "error",
+    "jest/expect-expect": "off",
     "oxc/bad-bitwise-operator": "error",
     "oxc/no-barrel-file": "error",
     "typescript/explicit-module-boundary-types": "off", // consider enabling

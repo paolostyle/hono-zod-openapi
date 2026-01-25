@@ -210,25 +210,30 @@ describe('object-based openApi middleware', () => {
     new Hono().post(
       '/user',
       openApi({
+        request: {
+          query: z.object({
+            status: z.number(),
+          }),
+        },
         responses: {
           // 1. minimal version: just zod schema, media type is inferred to be application/json
-          default: z.object({ name: z.string() }),
+          default: z.object({ message: z.string() }),
           // 2. library's own object notation
           // 2a. just schema, media type is inferred to be text/plain for z.strings()
           200: {
-            schema: z.string(),
+            schema: z.object({
+              name: z.string(),
+            }),
           },
           // 2b. schema + headers, media type is inferred to be application/json
           201: {
-            schema: z.object({ name: z.string() }),
+            schema: z.object({ created: z.boolean() }),
             headers: z.object({ 'x-custom-header': z.string() }),
           },
           // 2c. custom description (description is required in OpenAPI but we're providing defaults)
           202: {
             description: 'Result is accepted',
-            schema: z
-              .object({ name: z.string() })
-              .meta({ example: { name: 'John' } }),
+            schema: z.string(),
           },
           // 2d. custom description, schema, explicit media type
           203: {
@@ -245,18 +250,7 @@ describe('object-based openApi middleware', () => {
             description: 'Just headers',
             headers: z.object({ 'x-custom-header': z.string() }),
           },
-          // 3. _invalid_ library's own object notations, some should be perhaps allowed
-          // @ts-expect-error 3a. empty object - just add a description
-          300: {},
-          // @ts-expect-error 3b. just headers without description - just add a description
-          301: {
-            headers: z.object({ 'x-custom-header': z.string() }),
-          },
-          // @ts-expect-error 3c. just mediaType, adding description fixes the TypeScript error but it won't result in anything sensible
-          302: {
-            mediaType: 'text/html',
-          },
-          // 4. zod-openapi notation - description required, content type explicit, schema is a zod schema
+          // 3. zod-openapi notation - description required, content type explicit, schema is a zod schema
           400: {
             description: 'Some custom description',
             content: {
@@ -267,7 +261,7 @@ describe('object-based openApi middleware', () => {
               },
             },
           },
-          // 5. regular OpenAPI notation - description required, content type explicit, schema is an OpenAPI object
+          // 4. regular OpenAPI notation - description required, content type explicit, schema is an OpenAPI object
           401: {
             description: 'My error endpoint',
             content: {
@@ -286,14 +280,43 @@ describe('object-based openApi middleware', () => {
               },
             },
           },
-          // 6. reference object
+          // 5. reference object
           402: {
             $ref: '#/components/responses/ServerError',
           },
         },
       }),
       async (c) => {
-        return c.json({ name: 'John' }, 200);
+        const { status } = c.req.valid('query');
+        const { res } = c.var;
+
+        // invalid responses:
+        // @ts-expect-error 'default' is not a valid status code
+        const _resDefault = res('default', { message: 'John' });
+        // @ts-expect-error wrong type
+        const _res200Error = res(200, 123);
+        // @ts-expect-error defined but without zod schema
+        const _res401 = res(401, { name: 'error' });
+        // @ts-expect-error defined but without zod schema
+        const _res402 = res(402, { name: 'error' });
+
+        // shortened signature for 200, just for type testing
+        const _resSimple = res({ name: 'John' });
+
+        const validStrictlyTypedResponses = {
+          200: res(200, { name: 'John' }),
+          // todo: consider some support for headers
+          201: res(201, { created: true }, { 'x-custom-header': 'value' }),
+          202: res(202, 'Accepted'),
+          203: res(203, '<h1>HTML Content</h1>'),
+          204: res(204, null),
+          205: res(205, null, { 'x-custom-header': 'value' }),
+          400: res(400, { name: 'John' }),
+        };
+
+        return validStrictlyTypedResponses[
+          status as keyof typeof validStrictlyTypedResponses
+        ];
       },
     );
   });

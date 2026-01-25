@@ -1,9 +1,10 @@
 import type {
-  Env,
   MiddlewareHandler,
   ValidationTargets as ValidationTargetsWithForm,
 } from 'hono';
-import type { StatusCode } from 'hono/utils/http-status';
+import type { ResponseHeader } from 'hono/utils/headers';
+import type { ContentlessStatusCode, StatusCode } from 'hono/utils/http-status';
+import type { BaseMime } from 'hono/utils/mime';
 import type * as z from 'zod';
 import type {
   ZodOpenApiObject,
@@ -29,11 +30,23 @@ export type ValidationTargetParams<T extends z.ZodType> = {
 };
 
 type StatusCodePrefix = '1' | '2' | '3' | '4' | '5';
-type StatusCodeWithoutMinus1 = Exclude<StatusCode, -1>;
+export type StatusCodeWithoutMinus1 = Exclude<StatusCode, -1>;
 export type StatusCodeWithWildcards =
   | StatusCodeWithoutMinus1
   | `${StatusCodePrefix}XX`
   | 'default';
+
+// Check if a key is a wildcard or 'default'
+type IsWildcardOrDefault<K> = K extends 'default'
+  ? true
+  : K extends `${StatusCodePrefix}XX`
+    ? true
+    : false;
+
+// Contentless status codes (204, 205, 304) don't require a schema
+type IsContentlessStatusCode<K> = K extends ContentlessStatusCode
+  ? true
+  : false;
 
 /**
  * Mapping of zod-validator targets to their respective schemas, used both as a source of truth
@@ -143,9 +156,10 @@ export type HonoOpenApiResponses = Partial<
  */
 export interface HonoOpenApiOperation<
   Req extends HonoOpenApiRequestSchemas = HonoOpenApiRequestSchemas,
+  Res extends HonoOpenApiResponses = HonoOpenApiResponses,
 > extends Omit<ZodOpenApiOperationObject, 'requestParams' | 'responses'> {
   request?: Req;
-  responses: HonoOpenApiResponses;
+  responses: Res;
 }
 
 /**
@@ -156,8 +170,62 @@ export type HonoOpenApiDocument = Omit<ZodOpenApiObject, 'openapi'>;
 
 export type HonoOpenApiMiddleware = <
   Req extends HonoOpenApiRequestSchemas,
-  E extends Env,
   P extends string,
+  Res extends HonoOpenApiResponses,
 >(
-  operation: HonoOpenApiOperation<Req>,
-) => MiddlewareHandler<E, P, Values<Req>>;
+  operation: HonoOpenApiOperation<Req, Res>,
+) => MiddlewareHandler<HonoOpenApiMiddlewareEnv<Res>, P, Values<Req>>;
+
+type ExtractResponseSchema<T> = T extends SimpleResponseObject
+  ? T['schema']
+  : T extends ZodOpenApiResponseObject
+    ? T['content'] extends Record<string, { schema: z.ZodType }>
+      ? T['content'][keyof T['content']]['schema']
+      : never
+    : T extends z.ZodType
+      ? T
+      : never;
+
+export type ResponseSchemas<T extends HonoOpenApiResponses> = {
+  [S in keyof T as IsWildcardOrDefault<S> extends true
+    ? never
+    : IsContentlessStatusCode<S> extends true
+      ? S
+      : ExtractResponseSchema<T[S]> extends never
+        ? never
+        : S]: IsContentlessStatusCode<S> extends true
+    ? null
+    : ExtractResponseSchema<T[S]>;
+};
+
+type HeaderRecord =
+  | Record<'Content-Type', BaseMime>
+  | Record<ResponseHeader, string | string[]>
+  | Record<string, string | string[]>;
+
+type InferPayload<T> = T extends null ? null : z.infer<T>;
+
+type ResWithStatus<Schemas> = <S extends keyof Schemas>(
+  status: S,
+  payload: InferPayload<Schemas[S]>,
+  headers?: HeaderRecord,
+) => Response;
+
+type ResWithoutStatus<Schemas> = Schemas extends { 200: infer T }
+  ? (payload: z.infer<T>, headers?: HeaderRecord) => Response
+  : never;
+
+export type HonoOpenApiMiddlewareEnv<
+  Res extends HonoOpenApiResponses,
+  Schemas = ResponseSchemas<Res>,
+> = {
+  Variables: {
+    res: ResWithStatus<Schemas> & ResWithoutStatus<Schemas>;
+  };
+};
+
+export type ResponseSchema = {
+  status: string;
+  schema: z.ZodType | null;
+  contentType: string | null;
+};

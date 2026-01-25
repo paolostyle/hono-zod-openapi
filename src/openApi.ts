@@ -4,13 +4,32 @@ import { createMiddleware } from 'hono/factory';
 import * as z from 'zod';
 import type {
   HonoOpenApiMiddleware,
+  HonoOpenApiMiddlewareEnv,
   HonoOpenApiOperation,
   HonoOpenApiRequestSchemas,
+  HonoOpenApiResponses,
+  ResponseSchema,
   ValidationTarget,
+  Values,
   ZodValidatorFn,
 } from './types.ts';
 
 export const OpenApiSymbol = Symbol();
+
+const determineContentType = (schema: z.ZodType): string | null => {
+  if (schema instanceof z.ZodString || schema instanceof z.ZodStringFormat) {
+    return 'text/plain';
+  } else if (
+    schema instanceof z.ZodVoid ||
+    schema instanceof z.ZodUndefined ||
+    schema instanceof z.ZodNull ||
+    schema instanceof z.ZodNever
+  ) {
+    return null;
+  } else {
+    return 'application/json';
+  }
+};
 
 /**
  * Used internally to create the `openApi` middleware. You can use it if you have a custom `zod-validator` middleware,
@@ -21,8 +40,12 @@ export const OpenApiSymbol = Symbol();
 export function createOpenApiMiddleware(
   zodValidator: ZodValidatorFn = zValidator,
 ): HonoOpenApiMiddleware {
-  return function openApi(operation) {
-    const { request } = operation;
+  return function openApi<
+    Req extends HonoOpenApiRequestSchemas,
+    P extends string,
+    Res extends HonoOpenApiResponses,
+  >(operation: HonoOpenApiOperation<Req, Res>) {
+    const { request, responses } = operation;
     const metadata = {
       [OpenApiSymbol]: operation,
     };
@@ -49,7 +72,57 @@ export function createOpenApiMiddleware(
       })
       .filter((v) => !!v);
 
-    const middleware = every(...validators);
+    const middleware = createMiddleware<
+      HonoOpenApiMiddlewareEnv<Res>,
+      P,
+      Values<Req>
+    >(async (c, next) => {
+      c.set('res', (status, payload, headers) => {
+        const match = Object.entries(responses)
+          .flatMap<ResponseSchema>(([status, res]) => {
+            // direct zod schema
+            if (res instanceof z.ZodType) {
+              const contentType = determineContentType(res);
+              return [{ status, schema: res, contentType }];
+              // library notation
+            } else if ('schema' in res) {
+              const schema = res.schema;
+              const contentType = res.mediaType ?? determineContentType(schema);
+              return [{ status, schema, contentType }];
+              // openapi notation
+            } else if ('content' in res && typeof res.content === 'object') {
+              return Object.entries(res.content).map(
+                ([contentType, definition]) => {
+                  if (!definition) {
+                    return { status, schema: null, contentType };
+                  }
+
+                  if (definition.schema instanceof z.ZodType) {
+                    return { status, schema: definition.schema, contentType };
+                  }
+
+                  return { status, schema: null, contentType };
+                },
+              );
+            }
+
+            return [{ status, schema: null, contentType: null }];
+          })
+          .find((r) => r.status.toString() === status.toString());
+
+        if (!match) {
+          throw new Error(
+            `Response schema for status ${status as string} not defined in OpenAPI operation.`,
+          );
+        }
+
+        // if (match.contentType === 'text/plain') {
+        //   return c.text(payload as string, match.status, headers);
+        // }
+      });
+      every(...validators)(c, next);
+      await next();
+    });
 
     return Object.assign(middleware, metadata);
   };

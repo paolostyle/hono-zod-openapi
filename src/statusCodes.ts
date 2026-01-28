@@ -1,3 +1,9 @@
+import type { ContentfulStatusCode as HonoContentfulStatusCode } from 'hono/utils/http-status';
+import type {
+  StatusCodeWithoutMinus1,
+  StatusCodeWithWildcards,
+} from './types.ts';
+
 export const statusCodes = {
   default: 'Default',
   100: '100 Continue',
@@ -68,4 +74,15 @@ export const statusCodes = {
   '3XX': '3XX Redirection',
   '4XX': '4XX Client Error',
   '5XX': '5XX Server Error',
-};
+} satisfies Record<StatusCodeWithWildcards, string>;
+
+export const isValidResponseStatusCode = (
+  code: number | string,
+): code is StatusCodeWithoutMinus1 =>
+  Object.keys(statusCodes).includes(code.toString()) &&
+  !Number.isNaN(Number(code));
+
+export const isContentfulStatusCode = (
+  code: number | string,
+): code is Exclude<HonoContentfulStatusCode, -1> =>
+  ![101, 204, 205, 304, -1].includes(Number(code));

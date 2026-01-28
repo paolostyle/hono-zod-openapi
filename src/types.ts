@@ -1,5 +1,6 @@
 import type {
   MiddlewareHandler,
+  TypedResponse,
   ValidationTargets as ValidationTargetsWithForm,
 } from 'hono';
 import type { ResponseHeader } from 'hono/utils/headers';
@@ -198,26 +199,34 @@ export type ResponseSchemas<T extends HonoOpenApiResponses> = {
     : ExtractResponseSchema<T[S]>;
 };
 
-type HeaderRecord =
+export type HeaderRecord =
   | Record<'Content-Type', BaseMime>
   | Record<ResponseHeader, string | string[]>
   | Record<string, string | string[]>;
 
 type InferPayload<T> = T extends null ? null : z.infer<T>;
 
-type ResWithStatus<Schemas> = <S extends keyof Schemas>(
+type ResWithStatus<
+  Schemas extends Partial<Record<StatusCodeWithoutMinus1, unknown>>,
+> = <S extends keyof Schemas & StatusCodeWithoutMinus1>(
   status: S,
   payload: InferPayload<Schemas[S]>,
   headers?: HeaderRecord,
-) => Response;
+) => Response & TypedResponse<InferPayload<Schemas[S]>, S>;
 
-type ResWithoutStatus<Schemas> = Schemas extends { 200: infer T }
-  ? (payload: z.infer<T>, headers?: HeaderRecord) => Response
+type ResWithoutStatus<
+  Schemas extends Partial<Record<StatusCodeWithoutMinus1, unknown>>,
+> = Schemas extends { 200: infer T }
+  ? (
+      payload: z.infer<T>,
+      headers?: HeaderRecord,
+    ) => Response & TypedResponse<z.infer<T>, 200, 'json'>
   : never;
 
 export type HonoOpenApiMiddlewareEnv<
   Res extends HonoOpenApiResponses,
-  Schemas = ResponseSchemas<Res>,
+  Schemas extends Partial<Record<StatusCodeWithoutMinus1, unknown>> =
+    ResponseSchemas<Res>,
 > = {
   Variables: {
     res: ResWithStatus<Schemas> & ResWithoutStatus<Schemas>;

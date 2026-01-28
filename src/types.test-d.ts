@@ -26,9 +26,9 @@ it('ResponseSchemas', () => {
 
   type Schemas = ResponseSchemas<typeof responseSchemas>;
   expectTypeOf<Schemas>().toEqualTypeOf<{
-    200: { name: string };
-    202: { name: string };
-    400: { error: string };
-    401: { message: string };
+    200: (typeof responseSchemas)[200];
+    202: (typeof responseSchemas)[202]['schema'];
+    400: (typeof responseSchemas)[400]['schema'];
+    401: (typeof responseSchemas)[401]['content']['application/json']['schema'];
   }>();
 });

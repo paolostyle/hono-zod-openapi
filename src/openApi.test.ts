@@ -206,13 +206,13 @@ describe('object-based openApi middleware', () => {
     });
   });
 
-  it('works on type-level with all possible response variants', () => {
-    new Hono().post(
+  it('works on type-level with all possible response variants', async () => {
+    const app = new Hono().post(
       '/user',
       openApi({
         request: {
           query: z.object({
-            status: z.number(),
+            status: z.string(),
           }),
         },
         responses: {
@@ -256,8 +256,8 @@ describe('object-based openApi middleware', () => {
             content: {
               'application/json': {
                 schema: z
-                  .object({ name: z.string() })
-                  .meta({ example: { name: 'John' } }),
+                  .object({ err: z.string() })
+                  .meta({ examples: [{ err: 'John' }] }),
               },
             },
           },
@@ -304,14 +304,14 @@ describe('object-based openApi middleware', () => {
         const _resSimple = res({ name: 'John' });
 
         const validStrictlyTypedResponses = {
-          200: res(200, { name: 'John' }),
+          '200': res(200, { name: 'John' }),
           // todo: consider some support for headers
-          201: res(201, { created: true }, { 'x-custom-header': 'value' }),
-          202: res(202, 'Accepted'),
-          203: res(203, '<h1>HTML Content</h1>'),
-          204: res(204, null),
-          205: res(205, null, { 'x-custom-header': 'value' }),
-          400: res(400, { name: 'John' }),
+          '201': res(201, { created: true }, { 'x-custom-header': 'value' }),
+          '202': res(202, 'Accepted'),
+          '203': res(203, '<h1>HTML Content</h1>'),
+          '204': res(204, null),
+          '205': res(205, null, { 'x-custom-header': 'value' }),
+          '400': res(400, { err: 'John' }),
         };
 
         return validStrictlyTypedResponses[
@@ -319,6 +319,33 @@ describe('object-based openApi middleware', () => {
         ];
       },
     );
+
+    const client = testClient(app);
+    const testResponse = await client.user.$post({ query: { status: '200' } });
+    const responseCopy = testResponse.clone();
+    expect(await responseCopy.json()).toEqual({ name: 'John' });
+
+    if (testResponse.status === 200) {
+      expectTypeOf(testResponse.json()).resolves.toEqualTypeOf<{
+        name: string;
+      }>();
+    } else if (testResponse.status === 201) {
+      expectTypeOf(testResponse.json()).resolves.toEqualTypeOf<{
+        created: boolean;
+      }>();
+    } else if (testResponse.status === 202) {
+      expectTypeOf(testResponse.text()).resolves.toEqualTypeOf<string>();
+    } else if (testResponse.status === 203) {
+      expectTypeOf(testResponse.text()).resolves.toEqualTypeOf<string>();
+    } else if (testResponse.status === 204) {
+      expectTypeOf(testResponse.json()).resolves.toEqualTypeOf<null>();
+    } else if (testResponse.status === 205) {
+      expectTypeOf(testResponse.json()).resolves.toEqualTypeOf<null>();
+    } else if (testResponse.status === 400) {
+      expectTypeOf(testResponse.json()).resolves.toEqualTypeOf<{
+        err: string;
+      }>();
+    }
   });
 
   it('works properly with global middlewares', async () => {

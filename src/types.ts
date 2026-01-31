@@ -221,7 +221,8 @@ type ResWithoutStatus<
       payload: z.infer<T>,
       headers?: HeaderRecord,
     ) => Response & TypedResponse<z.infer<T>, 200, 'json'>
-  : never;
+  : // oxlint-disable-next-line typescript/no-empty-object-type
+    {};
 
 export type HonoOpenApiMiddlewareEnv<
   Res extends HonoOpenApiResponses,

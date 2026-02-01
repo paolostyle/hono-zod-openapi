@@ -30,7 +30,7 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts",
-    "format": "oxfmt --type-aware",
+    "format": "oxfmt",
     "format:check": "oxfmt --check",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",

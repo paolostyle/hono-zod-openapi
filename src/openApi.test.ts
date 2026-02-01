@@ -410,4 +410,23 @@ describe('object-based openApi middleware', () => {
 
     createOpenApiMiddleware(zodValidator);
   });
+
+  it('res middleware works without request validators', async () => {
+    const app = new Hono().get(
+      '/status',
+      openApi({
+        responses: {
+          200: z.object({ status: z.string() }),
+        },
+      }),
+      async (c) => {
+        return c.var.res({ status: 'ok' });
+      },
+    );
+    const client = testClient(app);
+    const res = await client.status.$get();
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ status: 'ok' });
+  });
 });

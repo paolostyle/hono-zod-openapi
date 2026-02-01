@@ -1,3 +1,4 @@
+import { createMiddleware } from 'hono/factory';
 import * as z from 'zod';
 import {
   isContentfulStatusCode,
@@ -12,7 +13,6 @@ import type {
   HonoOpenApiResponses,
   Values,
 } from './types.ts';
-import { createMiddleware } from 'hono/factory';
 
 export type ParsedResArgs = {
   status: number;

@@ -325,6 +325,45 @@ describe('createOpenApiDocument', () => {
     createOpenApiDocument(app, documentData);
   });
 
+  it('works with onError hook defined before the handler', async () => {
+    const app = new Hono()
+      .onError((err, c) => {
+        return c.json({ error: err.message }, 500);
+      })
+      .get(
+        '/example',
+        openApi({
+          responses: {
+            200: z.object({ hi: z.string() }),
+          },
+        }),
+        (c) => c.json({ hi: ':)' }),
+      );
+
+    createOpenApiDocument(app, documentData);
+
+    const response = await app.request('/doc');
+    const openApiSpec = await response.json();
+
+    expect(openApiSpec.paths['/example'].get.responses[200]).toEqual({
+      content: {
+        'application/json': {
+          schema: {
+            additionalProperties: false,
+            properties: {
+              hi: {
+                type: 'string',
+              },
+            },
+            required: ['hi'],
+            type: 'object',
+          },
+        },
+      },
+      description: '200 OK',
+    });
+  });
+
   it('normalizes path parameters correctly', async () => {
     const app = new Hono().get(
       '/user/:id',

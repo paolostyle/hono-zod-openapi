@@ -17,6 +17,13 @@ import type {
   NormalizedRequestSchemas,
   StatusCodeWithWildcards,
 } from './types.ts';
+import type { H } from 'hono/types';
+
+// when defining .onError on Hono instance, the framework internally wraps
+// all handlers defined earlier with a composed handler that has the original handler
+// under this property. The OpenApiSymbol is added to the original
+// handler, so we need to check for both when looking for OpenAPI metadata
+const COMPOSED_HANDLER = '__COMPOSED_HANDLER' as const;
 
 interface DocumentRouteSettings {
   /**
@@ -81,14 +88,17 @@ export function createOpenApiDocument<
 ): ReturnType<typeof createDocument> {
   const paths: ZodOpenApiPathsObject = {};
 
-  const decoratedRoutes = router.routes.filter(
-    (route) => OpenApiSymbol in route.handler,
-  );
+  for (const route of router.routes) {
+    const handler =
+      COMPOSED_HANDLER in route.handler
+        ? (route.handler.__COMPOSED_HANDLER as H)
+        : route.handler;
 
-  for (const route of decoratedRoutes) {
-    // must be done this way as we're smuggling the metadata behind user's back
-    // oxlint-disable-next-line typescript/no-explicit-any
-    const { request, responses, ...rest } = (route.handler as any)[
+    if (!(OpenApiSymbol in handler)) {
+      continue;
+    }
+
+    const { request, responses, ...rest } = handler[
       OpenApiSymbol
     ] as HonoOpenApiOperation;
 

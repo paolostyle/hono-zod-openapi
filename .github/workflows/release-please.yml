@@ -4,9 +4,20 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
+    inputs:
+      publish_npm:
+        description: 'Publish to NPM'
+        type: boolean
+        default: true
+      publish_jsr:
+        description: 'Publish to JSR'
+        type: boolean
+        default: true
 
 jobs:
   release-please:
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -21,7 +32,7 @@ jobs:
 
   npm-publish:
     needs: release-please
-    if: ${{ needs.release-please.outputs.release_created }}
+    if: ${{ always() && (needs.release-please.outputs.release_created || (github.event_name == 'workflow_dispatch' && inputs.publish_npm)) }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -46,7 +57,7 @@ jobs:
 
   jsr-publish:
     needs: release-please
-    if: ${{ needs.release-please.outputs.release_created }}
+    if: ${{ always() && (needs.release-please.outputs.release_created || (github.event_name == 'workflow_dispatch' && inputs.publish_jsr)) }}
     permissions:
       contents: read
       id-token: write

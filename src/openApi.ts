@@ -88,6 +88,9 @@ export const openApi: HonoOpenApiMiddleware = createOpenApiMiddleware();
  * });
  * ```
  */
-export const defineOpenApiOperation = <Req extends HonoOpenApiRequestSchemas>(
-  operation: HonoOpenApiOperation<Req>,
+export const defineOpenApiOperation = <
+  Req extends HonoOpenApiRequestSchemas,
+  Res extends HonoOpenApiResponses,
+>(
+  operation: HonoOpenApiOperation<Req, Res>,
 ) => operation;

@@ -202,7 +202,7 @@ describe('object-based openApi middleware', () => {
       const header = c.req.valid('header');
       expectTypeOf(header).toEqualTypeOf<{ 'api-key': string }>();
 
-      return c.json({ name: 'John' }, 200);
+      return c.var.res(200, { name: 'John' });
     });
   });
 

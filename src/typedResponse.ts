@@ -67,9 +67,6 @@ export const determineContentType = (schema: z.ZodType): string | null => {
   }
 };
 
-/**
- * Resolves the content type for a response based on the response schema definition.
- */
 export const resolveResponseContentType = (
   res: HonoOpenApiResponseObject,
 ): string | string[] | null => {

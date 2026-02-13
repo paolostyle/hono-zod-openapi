@@ -377,8 +377,8 @@ describe('typedResponseMiddleware', () => {
             },
           }),
           (c) => {
-            // Force invalid status at runtime
-            return (c.var.res as any)(999, {});
+            // @ts-expect-error - 999 is not a valid HTTP status code
+            return c.var.res(999, {});
           },
         )
         .onError((err, c) => {
@@ -400,8 +400,8 @@ describe('typedResponseMiddleware', () => {
             },
           }),
           (c) => {
-            // Force undefined status at runtime
-            return (c.var.res as any)(404, { error: 'not found' });
+            // @ts-expect-error - 400 is not defined in responses
+            return c.var.res(404, { error: 'not found' });
           },
         )
         .onError((err, c) => {
@@ -451,7 +451,7 @@ describe('typedResponseMiddleware', () => {
       expect(await response.text()).toBe('Hello World');
     });
 
-    it('returns text/html when mediaType is specified', async () => {
+    it('returns defined mediaType if specified', async () => {
       const app = new Hono().get(
         '/test',
         typedResponseMiddleware({

@@ -24,7 +24,7 @@ The `responses` field has 4 supported variants. You can mix and match them acros
 
 ### Raw Zod Schema
 
-For simple APIs this is more than enough. The `description` field will be equal to the full HTTP status code (e.g. `200 OK` or `500 Internal Server Error`) and media type will be inferred based on the passed schema — for `z.string()` it will be `text/plain`, otherwise it's `application/json`.
+For simple APIs this is more than enough. The `description` field will be equal to the full HTTP status code (e.g. `200 OK` or `500 Internal Server Error`) and media type will be inferred based on the passed schema - for `z.string()` it will be `text/plain`, otherwise it's `application/json`.
 
 ```ts
 openApi({

@@ -11,7 +11,7 @@
     "typescript",
     "zod"
   ],
-  "homepage": "https://github.com/paolostyle/hono-zod-openapi#readme",
+  "homepage": "https://hono-zod-openapi.pages.dev",
   "bugs": {
     "url": "https://github.com/paolostyle/hono-zod-openapi/issues"
   },

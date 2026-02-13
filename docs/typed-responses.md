@@ -149,5 +149,5 @@ The `res` helper catches errors at compile time:
 We do not currently support runtime validation. However, there are some
 sanity checks in place that _will_ affect runtime:
 
-- **Invalid status code** (e.g. `999`) — throws `"Invalid status code: 999. Must be a valid HTTP status code."`
-- **Undefined response schema** (e.g. using `404` when only `200` is defined) — throws `"Response schema for status 404 not defined in OpenAPI operation."`. If, for some reason, you need to handle this scenario, fall back to using `c.json()`.
+- **Invalid status code** (e.g. `999`) - throws `"Invalid status code: 999. Must be a valid HTTP status code."`
+- **Undefined response schema** (e.g. using `404` when only `200` is defined) - throws `"Response schema for status 404 not defined in OpenAPI operation."`. If, for some reason, you need to handle this scenario, fall back to using `c.json()`.

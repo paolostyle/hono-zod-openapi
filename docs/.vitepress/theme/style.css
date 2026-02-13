@@ -76,6 +76,12 @@
   --vp-c-brand-2: #f97316;
   --vp-c-brand-3: #ea580c;
   --vp-c-brand-soft: rgba(249, 115, 22, 0.16);
+
+  /* Tailwind Zinc palette for dark mode backgrounds */
+  --vp-c-bg: #09090b;
+  --vp-c-bg-alt: #18181b;
+  --vp-c-bg-elv: #18181b;
+  --vp-c-bg-soft: #27272a;
 }
 
 /**
@@ -105,6 +111,12 @@
   --vp-home-hero-image-filter: blur(44px);
 }
 
+@media screen and (max-width: 960px) {
+  .VPHero.has-image .image {
+    display: none;
+  }
+}
+
 @media (min-width: 640px) {
   :root {
     --vp-home-hero-image-filter: blur(56px);
@@ -114,6 +126,13 @@
 @media (min-width: 960px) {
   :root {
     --vp-home-hero-image-filter: blur(68px);
+  }
+
+  .VPHero .VPImage {
+    display: block;
+    max-width: 400px;
+    max-height: 400px;
+    padding: 32px 0;
   }
 }
 

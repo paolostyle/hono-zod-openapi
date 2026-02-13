@@ -48,10 +48,14 @@ import { defineOpenApiOperation } from 'hono-zod-openapi';
 import type {
   HonoOpenApiOperation,
   HonoOpenApiRequestSchemas,
+  HonoOpenApiResponses,
 } from 'hono-zod-openapi';
 
-const taggedAuthRoute = <T extends HonoOpenApiRequestSchemas>(
-  doc: HonoOpenApiOperation<T>,
+const taggedAuthRoute = <
+  Req extends HonoOpenApiRequestSchemas,
+  Res extends HonoOpenApiResponses,
+>(
+  doc: HonoOpenApiOperation<Req, Res>,
 ) => {
   return defineOpenApiOperation({
     ...doc,
@@ -77,7 +81,7 @@ openApi(
 
 In general, `hono-zod-openapi` stays away from error handling and delegates it fully to `zod-validator`. `zod-validator`, however, accepts a third argument `hook`, using which you can intercept the validation result for every usage of the middleware. There is no direct equivalent for that in `hono-zod-openapi`, as in my experience it made more sense to create a custom middleware that wraps `zod-validator` and handles the errors in a unified way.
 
-That approach **is** supported. You can create your own `openApi` middleware using `createOpenApiMiddleware` — it's used internally to create the `openApi` exported by the library.
+That approach **is** supported. You can create your own `openApi` middleware using `createOpenApiMiddleware` - it's used internally to create the `openApi` exported by the library.
 
 ### Example with `zod-validation-error`
 
@@ -107,4 +111,4 @@ export const openApi = createOpenApiMiddleware((target, schema) =>
 );
 ```
 
-If there is a need for handling errors on a case-by-case basis — create an issue and let's try to find a sensible solution for that!
+If there is a need for handling errors on a case-by-case basis - create an issue and let's try to find a sensible solution for that!

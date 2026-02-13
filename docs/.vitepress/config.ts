@@ -5,6 +5,9 @@ import { groupIconVitePlugin } from 'vitepress-plugin-group-icons';
 export default defineConfig({
   title: 'hono-zod-openapi',
   description: 'OpenAPI in Hono made easy',
+  head: [
+    ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
+  ],
   vite: {
     plugins: [groupIconVitePlugin()],
   },

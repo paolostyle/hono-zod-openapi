@@ -125,6 +125,8 @@ Hono provides a 3rd-party middleware in their [middleware monorepo](https://gith
 
 This library provides an `openApi` middleware instead, which you can easily add to your existing codebase, and a `createOpenApiDocument` function, which will generate an OpenAPI-compliant JSON document and serve it under `/doc` route of your app (it's configurable, don't worry).
 
+Under the hood, this library is powered by [`zod-openapi`](https://github.com/samchungy/zod-openapi). For advanced features like schema references,discriminated unions, or extending Zod schemas with OpenAPI metadata, refer to the [zod-openapi documentation](https://github.com/samchungy/zod-openapi).
+
 ## Features
 
 - **Simple usage** - just add a middleware and that's it!

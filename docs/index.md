@@ -4,7 +4,15 @@ layout: home
 
 hero:
   name: hono-zod-openapi
-  tagline: OpenAPI in Hono made easy
+  text: Type-safe OpenAPI middleware for Hono
+  tagline: Just add a middleware - no refactoring needed
+  image:
+    light:
+      src: /code-light.webp
+      alt: hono-zod-openapi code example
+    dark:
+      src: /code-dark.webp
+      alt: hono-zod-openapi code example
   actions:
     - theme: brand
       text: Getting Started
@@ -15,11 +23,15 @@ hero:
 
 features:
   - title: Simple Middleware
-    details: Just add the openApi middleware to your routes — no need to restructure your Hono app
+    icon: 🔌
+    details: Just add the middleware to your routes - no need to restructure your entire app
   - title: Typed Responses
-    details: Type-safe c.var.res helper ensures your responses match your OpenAPI schema at compile time
+    icon: 🛡️
+    details: Type-safe response helper ensures your responses match your OpenAPI schema at compile time
   - title: Request Validation
+    icon: ✅
     details: Built-in request validation powered by @hono/zod-validator with automatic OpenAPI translation
-  - title: Flexible Notation
-    details: Describe responses with raw Zod schemas, library notation, zod-openapi notation, or classic OpenAPI spec
+  - title: Less Boilerplate
+    icon: ✨
+    details: Start with just a Zod schema, use a simplified notation for more detail, or drop down to the full OpenAPI spec when needed
 ---

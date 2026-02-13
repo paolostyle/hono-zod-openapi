@@ -199,10 +199,9 @@ export type ResponseSchemas<T extends HonoOpenApiResponses> = {
     : ExtractResponseSchema<T[S]>;
 };
 
-export type HeaderRecord =
-  | Record<'Content-Type', BaseMime>
-  | Record<ResponseHeader, string | string[]>
-  | Record<string, string | string[]>;
+export type HeaderRecord = Record<string, string | string[]> & {
+  'Content-Type'?: BaseMime;
+} & Partial<Record<ResponseHeader, string | string[]>>;
 
 type InferPayload<T> = T extends null ? null : z.infer<T>;
 

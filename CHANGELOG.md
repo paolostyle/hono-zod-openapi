@@ -4,10 +4,9 @@ All notable changes to this project will be documented in this file. See [commit
 
 ## [1.0.3](https://github.com/paolostyle/hono-zod-openapi/compare/v1.0.2...v1.0.3) (2026-02-09)
 
-
 ### Bug Fixes
 
-* handle .onError used before defining routes ([81e46ed](https://github.com/paolostyle/hono-zod-openapi/commit/81e46ed687f412f5710407359b0bb02918406624))
+- handle .onError used before defining routes ([81e46ed](https://github.com/paolostyle/hono-zod-openapi/commit/81e46ed687f412f5710407359b0bb02918406624))
 
 ## [1.0.2](https://github.com/paolostyle/hono-zod-openapi/compare/v1.0.1...v1.0.2) (2026-01-25)
 

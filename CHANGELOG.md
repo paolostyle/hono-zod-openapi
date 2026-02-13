@@ -4,15 +4,13 @@ All notable changes to this project will be documented in this file. See [commit
 
 ## [1.1.0](https://github.com/paolostyle/hono-zod-openapi/compare/v1.0.3...v1.1.0) (2026-02-13)
 
-
 ### Features
 
-* typed responses ([#26](https://github.com/paolostyle/hono-zod-openapi/issues/26)) ([3f9fc20](https://github.com/paolostyle/hono-zod-openapi/commit/3f9fc20bb31450128f943f5e2ae884fb6b3ef3b2))
-
+- typed responses ([#26](https://github.com/paolostyle/hono-zod-openapi/issues/26)) ([3f9fc20](https://github.com/paolostyle/hono-zod-openapi/commit/3f9fc20bb31450128f943f5e2ae884fb6b3ef3b2))
 
 ### Bug Fixes
 
-* missing type param in defineOpenApiOperation ([418e9c2](https://github.com/paolostyle/hono-zod-openapi/commit/418e9c2c0f52effa5e33811ecc7182fd36e56454))
+- missing type param in defineOpenApiOperation ([418e9c2](https://github.com/paolostyle/hono-zod-openapi/commit/418e9c2c0f52effa5e33811ecc7182fd36e56454))
 
 ## [1.0.3](https://github.com/paolostyle/hono-zod-openapi/compare/v1.0.2...v1.0.3) (2026-02-09)
 

@@ -1,11 +1,12 @@
 import { zValidator } from '@hono/zod-validator';
 import { every } from 'hono/combine';
-import { createMiddleware } from 'hono/factory';
 import * as z from 'zod';
+import { typedResponseMiddleware } from './typedResponse.ts';
 import type {
   HonoOpenApiMiddleware,
   HonoOpenApiOperation,
   HonoOpenApiRequestSchemas,
+  HonoOpenApiResponses,
   ValidationTarget,
   ZodValidatorFn,
 } from './types.ts';
@@ -21,17 +22,20 @@ export const OpenApiSymbol = Symbol();
 export function createOpenApiMiddleware(
   zodValidator: ZodValidatorFn = zValidator,
 ): HonoOpenApiMiddleware {
-  return function openApi(operation) {
+  return function openApi<
+    Req extends HonoOpenApiRequestSchemas,
+    P extends string,
+    Res extends HonoOpenApiResponses,
+  >(operation: HonoOpenApiOperation<Req, Res>) {
     const { request } = operation;
     const metadata = {
       [OpenApiSymbol]: operation,
     };
 
+    const resMiddleware = typedResponseMiddleware<Req, P, Res>(operation);
+
     if (!request) {
-      const emptyMiddleware = createMiddleware(async (_, next) => {
-        await next();
-      });
-      return Object.assign(emptyMiddleware, metadata);
+      return Object.assign(resMiddleware, metadata);
     }
 
     const validators = Object.entries(request)
@@ -49,7 +53,7 @@ export function createOpenApiMiddleware(
       })
       .filter((v) => !!v);
 
-    const middleware = every(...validators);
+    const middleware = every(...validators, resMiddleware);
 
     return Object.assign(middleware, metadata);
   };

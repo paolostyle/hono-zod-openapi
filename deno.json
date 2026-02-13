@@ -1,6 +1,6 @@
 {
   "name": "@paolostyle/hono-zod-openapi",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "exports": "./src/index.ts",
   "publish": {
     "include": [
@@ -10,7 +10,10 @@
       "README.md",
       "CHANGELOG.md"
     ],
-    "exclude": ["src/**/*.test.ts", "src/**/*.test-d.ts"]
+    "exclude": [
+      "src/**/*.test.ts",
+      "src/**/*.test-d.ts"
+    ]
   },
   "imports": {
     "@hono/zod-validator": "npm:@hono/zod-validator@^0.7.6",

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.1.1](https://github.com/paolostyle/hono-zod-openapi/compare/v1.1.0...v1.1.1) (2026-02-18)
+
+
+### Bug Fixes
+
+* export missing type ([d7896ee](https://github.com/paolostyle/hono-zod-openapi/commit/d7896ee42f391c6aadb4b6e6c6e0f4c26059a130))
+
 ## [1.1.0](https://github.com/paolostyle/hono-zod-openapi/compare/v1.0.3...v1.1.0) (2026-02-13)
 
 ### Features

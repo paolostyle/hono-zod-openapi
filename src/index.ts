@@ -9,4 +9,5 @@ export type {
   HonoOpenApiResponseObject,
   HonoOpenApiOperation,
   HonoOpenApiRequestSchemas,
+  HonoOpenApiResponses,
 } from './types.ts';

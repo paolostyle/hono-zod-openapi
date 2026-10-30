@@ -411,6 +411,53 @@ describe('object-based openApi middleware', () => {
     createOpenApiMiddleware(zodValidator);
   });
 
+  it('custom validators from createOpenApiMiddleware compose with reusable middleware', async () => {
+    const targets: string[] = [];
+    const customOpenApi = createOpenApiMiddleware((target, schema) =>
+      zValidator(target, schema, (result, c) => {
+        targets.push(target);
+        if (!result.success) {
+          return c.json({ custom: true }, 422);
+        }
+      }),
+    );
+
+    let middlewareRuns = 0;
+    const app = new Hono<{ Variables: { userId: string } }>().post(
+      '/user',
+      customOpenApi(
+        {
+          request: { json: z.object({ name: z.string() }) },
+          responses: { 200: z.object({ name: z.string() }) },
+        },
+        async (_c, next) => {
+          middlewareRuns += 1;
+          await next();
+        },
+      ),
+      (c) => c.json({ name: c.req.valid('json').name }, 200),
+    );
+
+    const invalid = await app.request('/user', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 123 }),
+    });
+    expect(invalid.status).toBe(422);
+    expect(await invalid.json()).toEqual({ custom: true });
+    expect(middlewareRuns).toBe(0);
+    expect(targets).toEqual(['json']);
+
+    const valid = await app.request('/user', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'John' }),
+    });
+    expect(valid.status).toBe(200);
+    expect(await valid.json()).toEqual({ name: 'John' });
+    expect(middlewareRuns).toBe(1);
+  });
+
   it('res middleware works without request validators', async () => {
     const app = new Hono().get(
       '/status',

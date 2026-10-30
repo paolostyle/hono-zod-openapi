@@ -3,6 +3,7 @@ import { expectTypeOf, describe, expect, it } from 'vitest';
 import * as z from 'zod';
 import {
   createOpenApiDocument,
+  hasWildcardSegment,
   normalizePathParams,
 } from './createOpenApiDocument.ts';
 import { defineOpenApiOperation, openApi } from './openApi.ts';
@@ -19,6 +20,203 @@ const documentData = {
 };
 
 describe('createOpenApiDocument', () => {
+  it('throws when sibling chain middleware and the route declare the same request target differently', () => {
+    const authFragment = openApi({
+      request: {
+        header: z.object({
+          authorization: z.string().startsWith('Bearer ').optional(),
+        }),
+      },
+      responses: {
+        401: z.object({ code: z.string(), message: z.string() }),
+      },
+    });
+
+    const app = new Hono().get(
+      '/me',
+      authFragment,
+      openApi({
+        request: {
+          header: z.object({ authorization: z.number() }),
+        },
+        responses: {
+          200: z.object({ ok: z.string() }),
+        },
+      }),
+      (c) => c.var.res(200, { ok: 'never reached' }),
+    );
+
+    expect(() => createOpenApiDocument(app, documentData)).toThrowError(
+      /GET \/me.*header\.authorization.*conflict/,
+    );
+  });
+
+  it('throws when a sibling middleware declares a response status differently', () => {
+    const fragment = openApi({
+      responses: {
+        401: z.object({ code: z.string() }),
+      },
+    });
+
+    const app = new Hono().get(
+      '/me',
+      fragment,
+      openApi({
+        responses: {
+          200: z.object({ ok: z.string() }),
+          401: z.object({ message: z.string() }),
+        },
+      }),
+      (c) => c.var.res(200, { ok: 'never reached' }),
+    );
+
+    expect(() => createOpenApiDocument(app, documentData)).toThrowError(
+      /GET \/me.*'401'.*different schema/,
+    );
+  });
+
+  it('allows sibling declarations that are output-compatible', () => {
+    const fragment = openApi({
+      request: {
+        header: z.object({
+          authorization: z.string().optional(),
+        }),
+      },
+      responses: {
+        401: z.object({ code: z.string(), message: z.string() }),
+      },
+    });
+
+    const app = new Hono().get(
+      '/me',
+      fragment,
+      openApi({
+        request: {
+          header: z.object({
+            // meta/documentation differences do not change the contract
+            authorization: z
+              .string()
+              .meta({ description: 'Bearer token' })
+              .optional(),
+          }),
+        },
+        responses: {
+          200: z.object({ ok: z.string() }),
+        },
+      }),
+      (c) => c.var.res(200, { ok: 'reached' }),
+    );
+
+    expect(() => createOpenApiDocument(app, documentData)).not.toThrow();
+  });
+
+  it('merges different request targets declared by sibling chain entries', () => {
+    const app = new Hono().post(
+      '/me',
+      openApi({
+        request: {
+          header: z.object({ authorization: z.string() }),
+        },
+      }),
+      openApi({
+        request: {
+          json: z.object({ name: z.string() }),
+        },
+      }),
+      (c) => c.json({ name: c.req.valid('json').name }, 200),
+    );
+
+    const operation = createOpenApiDocument(app, documentData, {
+      addRoute: false,
+    }).paths?.['/me']?.post;
+
+    expect(
+      (operation?.parameters ?? []).map((parameter) =>
+        'name' in parameter ? parameter.name : undefined,
+      ),
+    ).toEqual(['authorization']);
+
+    const requestBody = operation?.requestBody as
+      | {
+          content?: Record<
+            string,
+            {
+              schema?: {
+                type?: string;
+                properties?: Record<string, unknown>;
+              };
+            }
+          >;
+        }
+      | undefined;
+    expect(requestBody?.content?.['application/json']?.schema?.type).toBe(
+      'object',
+    );
+    expect(
+      Object.keys(
+        requestBody?.content?.['application/json']?.schema?.properties ?? {},
+      ),
+    ).toEqual(['name']);
+  });
+
+  it('merges disjoint properties of the same request target declared by sibling chain entries', () => {
+    const app = new Hono().post(
+      '/me',
+      openApi({
+        request: {
+          header: z.object({ authorization: z.string() }),
+        },
+      }),
+      openApi({
+        request: {
+          header: z.object({ 'x-request-id': z.string() }),
+        },
+      }),
+      (c) => c.json({ ok: true }, 200),
+    );
+
+    const operation = createOpenApiDocument(app, documentData, {
+      addRoute: false,
+    }).paths?.['/me']?.post;
+
+    expect(
+      (operation?.parameters ?? []).map((parameter) =>
+        'name' in parameter ? parameter.name : undefined,
+      ),
+    ).toEqual(['authorization', 'x-request-id']);
+  });
+
+  it('throws a clear error when a documented route is a wildcard', () => {
+    const app = new Hono().get(
+      '/api/*',
+      openApi({
+        responses: { 200: z.object({ ok: z.boolean() }) },
+      }),
+      (c) => c.json({ ok: true }, 200),
+    );
+
+    expect(() => createOpenApiDocument(app, documentData)).toThrowError(
+      /Cannot document wildcard route "GET \/api\/\*"/,
+    );
+  });
+
+  it('does not treat a star inside a path matcher as a wildcard', () => {
+    const app = new Hono().get(
+      '/post/:date{[0-9]*}',
+      openApi({
+        request: { param: z.object({ date: z.string() }) },
+        responses: { 200: z.object({ date: z.string() }) },
+      }),
+      (c) => c.json({ date: c.req.valid('param').date }, 200),
+    );
+
+    const document = createOpenApiDocument(app, documentData, {
+      addRoute: false,
+    });
+
+    expect(document.paths?.['/post/{date}']?.get).toBeDefined();
+  });
+
   it('correctly passes metadata to the document and creates the document under /doc route', async () => {
     const app = new Hono();
 
@@ -413,5 +611,21 @@ describe('normalizePathParams', () => {
     ${'/posts/:id/comment/:comment_id'}     | ${'/posts/{id}/comment/{comment_id}'}
   `('normalizes $honoPath to $openApiPath', ({ honoPath, openApiPath }) => {
     expect(normalizePathParams(honoPath)).toBe(openApiPath);
+  });
+});
+
+describe('hasWildcardSegment', () => {
+  it.each`
+    honoPath                        | isWildcard
+    ${'/*'}                         | ${true}
+    ${'/api/*'}                     | ${true}
+    ${'/api/v1/*'}                  | ${true}
+    ${'/api/*/thing'}               | ${true}
+    ${'/api/:id'}                   | ${false}
+    ${'/post/:date{[0-9]*}'}        | ${false}
+    ${'/post/:filename{.*\\.png$}'} | ${false}
+    ${'/literal-star-in-name'}      | ${false}
+  `('reports $honoPath as $isWildcard', ({ honoPath, isWildcard }) => {
+    expect(hasWildcardSegment(honoPath)).toBe(isWildcard);
   });
 });

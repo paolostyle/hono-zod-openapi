@@ -7,20 +7,25 @@ import type {
   StatusCodeWithWildcards,
 } from './types.ts';
 
+const inferredMediaType = (schema: z.ZodType): string =>
+  schema instanceof z.ZodString ? 'text/plain' : 'application/json';
+
+const warnIfMediaTypeIsAmbiguous = (schema: z.ZodType, path: string): void => {
+  if (schema instanceof z.ZodObject || schema instanceof z.ZodArray) return;
+
+  console.warn(
+    `Your schema for ${path} is not an object or array, it's recommended to provide an explicit mediaType.`,
+  );
+};
+
 export const normalizeResponse = (
   res: HonoOpenApiResponseObject,
   status: StatusCodeWithWildcards,
   path: string,
 ): ZodOpenApiResponseObject | ReferenceObject => {
   if (res instanceof z.ZodType) {
-    const contentType =
-      res instanceof z.ZodString ? 'text/plain' : 'application/json';
-
-    if (!(res instanceof z.ZodObject) && !(res instanceof z.ZodArray)) {
-      console.warn(
-        `Your schema for ${path} is not an object or array, it's recommended to provide an explicit mediaType.`,
-      );
-    }
+    const contentType = inferredMediaType(res);
+    warnIfMediaTypeIsAmbiguous(res, path);
 
     return {
       description: statusCodes[status],
@@ -34,19 +39,8 @@ export const normalizeResponse = (
 
   if ('schema' in res) {
     const { schema, description, mediaType, ...rest } = res;
-    const contentType =
-      mediaType ??
-      (schema instanceof z.ZodString ? 'text/plain' : 'application/json');
-
-    if (
-      !mediaType &&
-      !(schema instanceof z.ZodObject) &&
-      !(schema instanceof z.ZodArray)
-    ) {
-      console.warn(
-        `Your schema for ${path} is not an object or array, it's recommended to provide an explicit mediaType.`,
-      );
-    }
+    const contentType = mediaType ?? inferredMediaType(schema);
+    if (!mediaType) warnIfMediaTypeIsAmbiguous(schema, path);
 
     return {
       description: description ?? statusCodes[status],

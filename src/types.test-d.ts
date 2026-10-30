@@ -1,5 +1,9 @@
 import { expectTypeOf, it } from 'vitest';
-import type { HonoOpenApiResponses, ResponseSchemas } from './types.ts';
+import type {
+  HonoOpenApiResponses,
+  OperationInputResponsesInternal,
+  ResponseSchemas,
+} from './types.ts';
 import * as z from 'zod';
 
 it('ResponseSchemas', () => {
@@ -31,4 +35,25 @@ it('ResponseSchemas', () => {
     400: (typeof responseSchemas)[400]['schema'];
     401: (typeof responseSchemas)[401]['content']['application/json']['schema'];
   }>();
+});
+
+it('keeps status keys in the contextual responses type when responses is omitted', () => {
+  type EmptyResponses = OperationInputResponsesInternal<
+    Record<never, never>,
+    Record<never, never>
+  >;
+
+  // `openApi()` and `createOpenApiFragment()` default `Res` to
+  // `Record<never, never>` when `responses` is omitted. The operation input
+  // must still expose the status-key set so IntelliSense can suggest `200`,
+  // `2XX`, `default`, etc. instead of falling back to an empty object.
+  expectTypeOf<
+    200 extends keyof EmptyResponses ? true : false
+  >().toEqualTypeOf<true>();
+  expectTypeOf<
+    '2XX' extends keyof EmptyResponses ? true : false
+  >().toEqualTypeOf<true>();
+  expectTypeOf<
+    'default' extends keyof EmptyResponses ? true : false
+  >().toEqualTypeOf<true>();
 });

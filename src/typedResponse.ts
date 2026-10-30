@@ -96,8 +96,11 @@ export const typedResponseMiddleware = <
 }: HonoOpenApiOperation<Req, Res>) =>
   createMiddleware<HonoOpenApiMiddlewareEnv<Res>, P, Values<Req>>(
     async (c, next) => {
+      const previous = c.get('res') as
+        // oxlint-disable-next-line typescript/no-explicit-any -- runtime-only fallback chain across differently-parameterized res helpers
+        ((...args: any[]) => any) | undefined;
       c.set('res', ((...args: unknown[]) => {
-        const { status, payload, headers } = parseResArgs(args);
+        const status = typeof args[0] === 'number' ? args[0] : 200;
 
         if (!isValidResponseStatusCode(status)) {
           throw new Error(
@@ -110,11 +113,19 @@ export const typedResponseMiddleware = <
         );
 
         if (!match) {
+          // A fragment declared upstream this route chain may already know
+          // this status (e.g. the route itself declares responses the
+          // fragment does not, or vice versa). Delegate instead of failing.
+          if (previous) {
+            return previous(...args);
+          }
+
           throw new Error(
             `Response schema for status ${status} not defined in OpenAPI operation.`,
           );
         }
 
+        const { payload, headers } = parseResArgs(args);
         const [, res] = match;
         const contentType = resolveResponseContentType(res);
 

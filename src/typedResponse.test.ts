@@ -553,4 +553,129 @@ describe('typedResponseMiddleware', () => {
       expect(response.headers.get('x-custom')).toBe('value');
     });
   });
+
+  describe('delegation across chained operations', () => {
+    it('falls back to a previously bound res for statuses not declared locally', async () => {
+      const app = new Hono().get(
+        '/test',
+        typedResponseMiddleware({
+          responses: {
+            200: z.object({ name: z.string() }),
+          },
+        }),
+        typedResponseMiddleware({
+          responses: {
+            401: z.object({ code: z.string() }),
+          },
+        }),
+        (c) => c.var.res(200, { name: 'John' }),
+      );
+
+      const response = await app.request('/test');
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({ name: 'John' });
+    });
+
+    it('keeps the local answer first when both operations declare the same status', async () => {
+      const app = new Hono().get(
+        '/test',
+        typedResponseMiddleware({
+          responses: {
+            401: z.object({ code: z.literal('FRAGMENT') }),
+          },
+        }),
+        typedResponseMiddleware({
+          responses: {
+            401: z.object({ code: z.literal('ROUTE') }),
+          },
+        }),
+        (c) => c.var.res(401, { code: 'ROUTE' }),
+      );
+
+      const response = await app.request('/test');
+      expect(response.status).toBe(401);
+      expect(await response.json()).toEqual({ code: 'ROUTE' });
+    });
+
+    it('delegates payload-and-headers calls without re-parsing', async () => {
+      const app = new Hono().get(
+        '/test',
+        typedResponseMiddleware({
+          responses: {
+            200: z.object({ name: z.string() }),
+          },
+        }),
+        typedResponseMiddleware({
+          responses: {
+            401: z.object({ code: z.string() }),
+          },
+        }),
+        (c) => c.var.res({ name: 'John' }, { 'x-request-id': 'abc' }),
+      );
+
+      const response = await app.request('/test');
+      expect(response.status).toBe(200);
+      expect(response.headers.get('x-request-id')).toBe('abc');
+      expect(await response.json()).toEqual({ name: 'John' });
+    });
+
+    it('still rejects undeclared statuses when there is no previous res', async () => {
+      const app = new Hono()
+        .onError((error, c) => c.text(error.message, 500))
+        .get(
+          '/test',
+          typedResponseMiddleware({
+            responses: {
+              200: z.object({ name: z.string() }),
+            },
+          }),
+          // 418 is not part of the operation's type contract; the runtime
+          // guard is exercised deliberately by widening the helper
+          (c) =>
+            (
+              c.var.res as unknown as (
+                status: number,
+                payload: unknown,
+              ) => Response
+            )(418, { error: 'teapot' }),
+        );
+
+      const response = await app.request('/test');
+      expect(response.status).toBe(500);
+      expect(await response.text()).toBe(
+        'Response schema for status 418 not defined in OpenAPI operation.',
+      );
+    });
+
+    it('still rejects invalid status codes even when a previous res exists', async () => {
+      const app = new Hono()
+        .onError((error, c) => c.text(error.message, 500))
+        .get(
+          '/test',
+          typedResponseMiddleware({
+            responses: {
+              200: z.object({ name: z.string() }),
+            },
+          }),
+          typedResponseMiddleware({
+            responses: {
+              401: z.object({ code: z.string() }),
+            },
+          }),
+          (c) =>
+            (
+              c.var.res as unknown as (
+                status: number,
+                payload: unknown,
+              ) => Response
+            )(999, { error: 'bad' }),
+        );
+
+      const response = await app.request('/test');
+      expect(response.status).toBe(500);
+      expect(await response.text()).toBe(
+        'Invalid status code: 999. Must be a valid HTTP status code.',
+      );
+    });
+  });
 });

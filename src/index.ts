@@ -1,5 +1,6 @@
 export { createOpenApiDocument } from './createOpenApiDocument.ts';
 export {
+  createOpenApiFragment,
   createOpenApiMiddleware,
   defineOpenApiOperation,
   openApi,
